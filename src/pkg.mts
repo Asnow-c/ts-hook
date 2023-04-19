@@ -2,7 +2,6 @@ import * as path from "node:path";
 import * as fs from "node:fs";
 import type { CompilerOptions } from "typescript";
 import { paseConfigOptions } from "./util/tslib.mjs";
-
 export class Pkg {
     private static loadedPkgMap = new Map<string, Pkg>();
 

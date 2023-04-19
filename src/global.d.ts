@@ -22,12 +22,17 @@ interface ResolveContext {
 }
 
 interface PackageConfig {
-    name: string;
-    main: string;
+    name?: string;
+    main?: string;
     type?: "module" | "commonjs";
-    exports: Record<string, any>;
-    imports: Record<string, any>;
+    exports?: Record<string, any>;
+    imports?: Record<string, any>;
 }
+type PkgExportsItemValue = string | null | string[];
+type PkgExports = Record<
+    "imports" | "require" | "node" | "default" | "types" | "." | string,
+    Record<string, PkgExportsItemValue> | PkgExportsItemValue
+>;
 
 type PkgFormat = "builtin" | "commonjs" | "json" | "module" | "wasm";
 interface ResolveFxReturn {
@@ -43,7 +48,7 @@ interface LoadContext {
     importAssertions: any;
 }
 interface LoadReturn {
-    format: string;
+    format: PkgFormat;
     shortCircuit?: boolean;
     source?: string | ArrayBuffer;
 }

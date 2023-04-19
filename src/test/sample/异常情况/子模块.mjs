@@ -1,1 +1,1 @@
-import "no_exports/s"
+import "no_exports/s/y.js"
