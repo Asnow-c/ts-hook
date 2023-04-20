@@ -1,6 +1,13 @@
 declare module "source-map-support" {}
+declare namespace NodeJS {
+    interface ProcessEnv {
+        ENABLE_TS_ALIAS?: string;
+        SAME_PARSER?: string;
+    }
+}
 
 type ModuleClass = typeof import("node:module");
+type HookConfig = import("./util/hook_config.mjs").HookConfig;
 interface ExtraModule extends ModuleClass {
     _readPackage(absPath: string): PackageConfig | undefined;
     _findPath(request: string, paths: string[], isMain: boolean): undefined | string;

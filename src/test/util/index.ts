@@ -13,14 +13,21 @@ const dir = resolveJsPath(import.meta).dir;
 const cwd = process.cwd();
 const loaderPath = "/" + Path.resolve(cwd, "hook.mjs");
 
-const env = undefined;
-
 export class Process {
-    static run(cwd: string, path: string) {
+    private static hookConfigToEnv(config: Partial<HookConfig>) {
+        let env: NodeJS.ProcessEnv = {};
+        if (config.enableTsAlias) env.ENABLE_TS_ALIAS = "true";
+        if (config.sameParsing) env.SAME_PARSER = "true";
+        return env;
+    }
+    static run(cwd: string, path: string, env?: Partial<HookConfig>) {
         let absPath = Path.resolve(cwd, path);
 
+        let options: Pick<ForkOptions, "env"> | undefined = undefined;
+        if (env) options = { env: this.hookConfigToEnv(env) };
+
         return new Promise<Process>(function (resolve) {
-            new Process(absPath, resolve, { env });
+            new Process(absPath, resolve, options);
         });
     }
     private ps: ChildProcess;

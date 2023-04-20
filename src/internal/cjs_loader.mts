@@ -1,6 +1,5 @@
 import * as Path from "node:path";
 import Module from "node:module";
-import { pathToFileURL } from "node:url";
 import type { Stats } from "node:fs";
 import * as fs from "node:fs";
 import { Pkg } from "./common_loader.mjs";
@@ -47,4 +46,11 @@ export function tryPkgSync(path: string): string | undefined {
     const main = ExtraModule._readPackage(path)?.main;
     if (main) return tryFileSync(Path.resolve(path, main));
     else return tryDirModSync(path);
+}
+
+export function tryTsAliasSync(request: string, parentDir: string): string | undefined {
+    const pkg = Pkg.upSearchPkg(parentDir);
+    if (!pkg) return;
+    let filename = pkg.tryTsAliasSync(parentDir, request);
+    if (filename) return filename;
 }

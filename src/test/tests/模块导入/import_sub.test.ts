@@ -21,11 +21,19 @@ describe.concurrent("导入没有exports字段的包", function () {
         const ext = ".mts";
         it("导入目录", async function () {
             let process = await Process.run(dir, "import_dir" + ext);
-            expectPs(process).isSafeExit();
-            expectPs(process).messageToEqual(["index.ts", "entry"]);
+            expect(process.exit?.code).toBe(1);
         });
         it("导入文件", async function () {
             let process = await Process.run(dir, "import_file" + ext);
+            expect(process.exit?.code).toBe(1);
+        });
+        it("导入目录-开启commonjs相同解析策略", async function () {
+            let process = await Process.run(dir, "import_dir" + ext, { sameParsing: true });
+            expectPs(process).isSafeExit();
+            expectPs(process).messageToEqual(["index.ts", "entry"]);
+        });
+        it("导入文件-开启commonjs相同解析策略", async function () {
+            let process = await Process.run(dir, "import_file" + ext, { sameParsing: true });
             expectPs(process).isSafeExit();
             expectPs(process).messageToEqual(["index.ts", "entry"]);
         });

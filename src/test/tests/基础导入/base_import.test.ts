@@ -25,14 +25,22 @@ describe.concurrent("mts", function () {
         expectPs(ps).isSafeExit();
         expectPs(ps).messageToEqual(["imported ts", "imported cts", "imported mts", "entry"]);
     });
-    it("省略扩展名导入", async function () {
-        const ps = await Process.run(meta.dir, "./省略扩展名导入.mts");
+    it("省略扩展名导入-开启与commonjs相同解析策略", async function () {
+        const ps = await Process.run(meta.dir, "./省略扩展名导入.mts", { sameParsing: true });
         expectPs(ps).isSafeExit();
         expectPs(ps).messageToEqual(["imported ts", "entry"]);
     });
-    it("导入目录", async function () {
-        const ps = await Process.run(meta.dir, "./导入目录.mts");
+    it("导入目录-开启与commonjs相同解析策略", async function () {
+        const ps = await Process.run(meta.dir, "./导入目录.mts", { sameParsing: true });
         expectPs(ps).isSafeExit();
         expectPs(ps).messageToEqual(["imported dir", "entry"]);
+    });
+    it("省略扩展名导入", async function () {
+        const ps = await Process.run(meta.dir, "./省略扩展名导入.mts");
+        expect(ps.exit?.code).toBe(1);
+    });
+    it("导入目录", async function () {
+        const ps = await Process.run(meta.dir, "./导入目录.mts");
+        expect(ps.exit?.code).toBe(1);
     });
 });

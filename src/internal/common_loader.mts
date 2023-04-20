@@ -4,6 +4,7 @@ import * as fsp from "node:fs/promises";
 import * as fs from "node:fs";
 import type * as ts from "typescript";
 import * as Path from "node:path";
+import { CodeError } from "./errors/error.mjs";
 export const ExtraModule = Module as ExtraModule;
 
 export class Pkg implements PackageConfig {
@@ -27,6 +28,13 @@ export class Pkg implements PackageConfig {
         this.imports = pkgConfig.imports;
         this.exports = pkgConfig.exports;
     }
+    getFileFormat(filename: string): PkgFormat {
+        const { ext } = Path.parse(filename);
+        if (ext === ".cts" || ".cjs") return "commonjs";
+        else if (ext === ".mts" || ".mjs") return "module";
+        else if (ext === ".ts" || ext == "js") return this.defaultFormat;
+        else return "commonjs";
+    }
     name?: string;
     main?: string;
     exports?: Record<string, any>;
@@ -40,7 +48,7 @@ export class Pkg implements PackageConfig {
     tryTsAliasSync(importerPathname: string, request: string) {
         const tsConfig = TsCompilerConfig.getTsCompilerConfigSync(this.pkgPath, this.pkgConfig);
         if (!tsConfig) return;
-        return tsConfig.paseAlias(importerPathname, request);
+        return tsConfig.paseAliasSync(importerPathname, request);
     }
     async tryTsAlias(importerPathname: string, request: string) {
         const tsConfig = await TsCompilerConfig.getTsCompilerConfig(this.pkgPath, this.pkgConfig);
@@ -140,5 +148,17 @@ export class TsCompilerConfig {
             }
         }
         return null;
+    }
+}
+
+export type ModResolveError = CodeError & { path?: string; requireStack?: string[] };
+
+export function requestToNameAndSubPath(request: string) {
+    const res = /^((?:@[^/\\%]+\/)?[^./\\%][^/\\%]*)(\/.*)?$/.exec(request);
+    if (res) {
+        return {
+            pkgName: res[1],
+            subPath: res[2] ?? "",
+        };
     }
 }

@@ -3,9 +3,12 @@
     "description": "description",
     "authors": "author",
     "version": "1.0.0",
-    "main": "pathToMain",
     "dependencies": {},
     "exports": {
-        "./*": "./*"
+        "./*": "./*.js",
+        ".": {
+            "import": "./src/import_self.mts",
+            "require": "./src/import_self.cts"
+        }
     }
 }

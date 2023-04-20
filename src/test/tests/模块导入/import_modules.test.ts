@@ -24,10 +24,14 @@ describe.concurrent("导入package.json指定的main", function () {
             expectPs(process).isSafeExit();
             expectPs(process).messageToEqual(["index.ts", "entry"]);
         });
-        it("mts", async function () {
-            let process = await Process.run(dir, "import_main.mts");
+        it("mts-开启相同commonjs解析策略", async function () {
+            let process = await Process.run(dir, "import_main.mts", { sameParsing: true });
             expectPs(process).isSafeExit();
             expectPs(process).messageToEqual(["index.ts", "entry"]);
+        });
+        it("mts", async function () {
+            let process = await Process.run(dir, "import_main.mts");
+            expect(process.exit?.code).toBe(1);
         });
     });
     describe.concurrent("导入有exports字段的包", function () {

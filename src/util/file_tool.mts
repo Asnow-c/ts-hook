@@ -13,3 +13,11 @@ export function* upSearch(checkPath: string, first = true) {
     }
     return;
 }
+/**
+ * @returns undefined: 请求不是路径  string: 绝对路径
+ */
+export function toAbsPath(request: string, parentPath: string) {
+    let isRel = request === "." || request === ".." || /^\.\.?[\\\/]/.test(request);
+    if (isRel) return Path.resolve(parentPath, request);
+    if (Path.isAbsolute(request)) return request;
+}
