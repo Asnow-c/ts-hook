@@ -2,7 +2,7 @@
     "compilerOptions": {
         "module": "ESNext",
         "target": "ESNext",
-        "moduleResolution": "nodenext",
+        "moduleResolution": "node",
         "sourceMap": true,
         "skipDefaultLibCheck": true,
         "strict": true,

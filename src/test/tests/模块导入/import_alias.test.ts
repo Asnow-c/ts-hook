@@ -5,7 +5,7 @@ let meta = resolveJsPath(import.meta);
 
 describe.concurrent("使用别名导入", function () {
     const dir = meta.dir + "/import_alias/self/src";
-    it("cts导入", async function () {
+    it("cts", async function () {
         let process = await Process.run(dir, "entry.cts");
         expectPs(process).isSafeExit();
         expectPs(process).messageToEqual(["alias"]);
@@ -14,5 +14,39 @@ describe.concurrent("使用别名导入", function () {
         let process = await Process.run(dir, "entry.mts");
         expectPs(process).isSafeExit();
         expectPs(process).messageToEqual(["alias"]);
+    });
+});
+
+describe.concurrent("使用tsconfig的paths别名导入", function () {
+    const dir = meta.dir + "/import_alias/ts_paths_alias";
+    it("cts", async function () {
+        let process = await Process.run(dir, "entry.cts");
+        expect(process.exit?.code).toBe(1);
+    });
+    it("mts", async function () {
+        let process = await Process.run(dir, "entry.mts");
+        expect(process.exit?.code).toBe(1);
+    });
+    describe.concurrent("开启路径别名导入", function () {
+        it("cts-全路径别名", async function () {
+            let process = await Process.run(dir, "entry_full_ext.cts", { enableTsAlias: true });
+            expectPs(process).isSafeExit();
+            expectPs(process).messageToEqual(["alias"]);
+        });
+        it("mts-全路径别名", async function () {
+            let process = await Process.run(dir, "entry_full_ext.mts", { enableTsAlias: true });
+            expectPs(process).isSafeExit();
+            expectPs(process).messageToEqual(["alias"]);
+        });
+        it("cts-无扩展名别名", async function () {
+            let process = await Process.run(dir, "entry_no_ext.cts", { enableTsAlias: true });
+            expectPs(process).isSafeExit();
+            expectPs(process).messageToEqual(["alias"]);
+        });
+        it("mts-无扩展名别名", async function () {
+            let process = await Process.run(dir, "entry_no_ext.mts", { enableTsAlias: true });
+            expectPs(process).isSafeExit();
+            expectPs(process).messageToEqual(["alias"]);
+        });
     });
 });

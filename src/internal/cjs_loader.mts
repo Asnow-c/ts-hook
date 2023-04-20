@@ -20,8 +20,7 @@ export function tryWithoutExtSync(absPath: string) {
     return filename;
 }
 
-export function tryFileSync(absPathWithoutExt: string, extList = [".js", ".ts"]): string | undefined {
-    let tryDir: string[] = [];
+export function tryFileSync(absPathWithoutExt: string, extList: string[]): string | undefined {
     for (const ext of extList) {
         let absPath = absPathWithoutExt + ext;
         let info: Stats;
@@ -31,26 +30,46 @@ export function tryFileSync(absPathWithoutExt: string, extList = [".js", ".ts"])
             continue;
         }
         if (info.isFile()) return absPath;
-        else if (info.isDirectory()) tryDir.push(absPath);
-    }
-    for (const dir of tryDir) {
-        let filename = tryPkgSync(dir);
-        if (filename) return filename;
     }
 }
 function tryDirModSync(path: string) {
-    let modPath = tryFileSync(Path.resolve(path, "index"));
+    let modPath = tryFileSync(Path.resolve(path, "index"), [".ts"]);
     if (modPath) return modPath;
 }
-export function tryPkgSync(path: string): string | undefined {
+function tryPkgSync(path: string): string | undefined {
     const main = ExtraModule._readPackage(path)?.main;
-    if (main) return tryFileSync(Path.resolve(path, main));
+    if (main) return tryFileSync(Path.resolve(path, main), [".ts"]);
     else return tryDirModSync(path);
 }
 
 export function tryTsAliasSync(request: string, parentDir: string): string | undefined {
-    const pkg = Pkg.upSearchPkg(parentDir);
-    if (!pkg) return;
-    let filename = pkg.tryTsAliasSync(parentDir, request);
+    const tsConfig = Pkg.upSearchPkg(parentDir)?.getTsConfigSync();
+    if (!tsConfig) return;
+
+    let filename = tsConfig.findAliasCache(request + "\u0000c");
     if (filename) return filename;
+    for (let tryPath of tsConfig.paseAlias(request)) {
+        try {
+            const info = fs.statSync(tryPath);
+
+            if (info.isFile()) {
+                filename = tryPath;
+                break;
+            } else if (info.isDirectory()) {
+                let extFilename = tryPath + "index";
+                filename = tryFileSync(extFilename, [".js", ".ts", ".json"]);
+                if (filename) break;
+            } else {
+                filename = tryWithoutExtSync(tryPath) || tryFileSync(tryPath, [".js", ".ts", ".json"]);
+                if (filename) break;
+            }
+        } catch (error) {
+            filename = tryWithoutExtSync(tryPath) || tryFileSync(tryPath, [".js", ".ts", ".json"]);
+            if (filename) break;
+        }
+    }
+    if (filename) {
+        tsConfig.setAliasCache(request + "\u0000c", filename);
+        return filename;
+    }
 }

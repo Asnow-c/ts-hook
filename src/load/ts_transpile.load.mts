@@ -40,7 +40,9 @@ const TOP_OPTIONS = (function () {
         19: ScriptTarget.ES2022,
     };
     const version = process.version.slice(1, process.version.indexOf("."));
-    const TARGET = NodeVersionMap[version] ?? ScriptTarget.ESNext;
+    const TARGET = DEFAULT_COMPILER_OPTIONS.target
+        ? DEFAULT_COMPILER_OPTIONS.target
+        : NodeVersionMap[version] ?? ScriptTarget.ESNext;
 
     const TOP_OPTIONS: ts.CompilerOptions = {
         removeComments: true,

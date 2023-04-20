@@ -1,6 +1,6 @@
 {
     "name": "@asnc/ts_hook",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "publishConfig": {
         "access": "public",
         "registry": "https://registry.npmjs.org/",
@@ -8,9 +8,7 @@
     },
     "description": "",
     "files": [
-        "out",
-        "package.json",
-        "readme.md",
+        "out/**/*.mjs",
         "ts_hook.mjs"
     ],
     "scripts": {

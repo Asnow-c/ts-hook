@@ -30,7 +30,6 @@ export async function tryWithoutExt(absRequest: string): Promise<ResolveFxReturn
 }
 
 export async function tryFile(absPathWithoutExt: string, extList: string[]): Promise<string | undefined> {
-    let tryDir: string[] = [];
     for (const ext of extList) {
         let absPath = absPathWithoutExt + ext;
         let info: Stats;
@@ -40,15 +39,10 @@ export async function tryFile(absPathWithoutExt: string, extList: string[]): Pro
             continue;
         }
         if (info.isFile()) return pathToFileURL(absPath).toString();
-        else if (info.isDirectory()) tryDir.push(absPath);
-    }
-    for (const dir of tryDir) {
-        let fileUrl = await tryPkg(dir);
-        if (fileUrl) return fileUrl;
     }
 }
 async function tryDirMod(path: string) {
-    let modPath = await tryFile(Path.resolve(path, "index"), [".js", ".ts"]);
+    let modPath = await tryFile(Path.resolve(path, "index"), [".js", ".ts", ".json"]);
     if (modPath) return modPath;
 }
 export async function tryPkg(path: string): Promise<string | undefined> {
@@ -61,9 +55,16 @@ export async function tryTs(resolvedPath: string) {
     let result = await tryWithoutExt(resolvedPath);
     if (result) return result;
 
-    let filename = await tryFile(resolvedPath, ["", ".ts"]);
-    if (!filename) return;
-
+    let filename: string | undefined;
+    try {
+        let info = await fsp.stat(resolvedPath);
+        if (info.isDirectory()) {
+            filename = await tryDirMod(resolvedPath);
+        }
+    } catch (error) {
+        filename = await tryFile(resolvedPath, [".ts"]);
+        if (!filename) return;
+    }
     let format: PkgFormat =
         ExtraModule._readPackage(fileURLToPath(filename!))?.type === "module" ? "module" : "commonjs";
     return {
@@ -73,11 +74,49 @@ export async function tryTs(resolvedPath: string) {
     };
 }
 
-export async function tryTsAlias(request: string, parentFilename: string): Promise<ResolveFxReturn | undefined> {
+export async function tryTsAlias(
+    request: string,
+    parentFilename: string,
+    extList?: string[],
+    tryDir?: boolean
+): Promise<ResolveFxReturn | undefined> {
     const pkg = Pkg.upSearchPkg(Path.resolve(parentFilename, ".."));
     if (!pkg) return;
-    let filename = await pkg.tryTsAlias(parentFilename, request);
-    if (filename) return { url: fileURLToPath(filename), shortCircuit: true, format: pkg.getFileFormat(filename) };
+    const tsConfig = await pkg?.getTsConfig();
+    if (!tsConfig) return;
+
+    let fileUrl = tsConfig.findAliasCache(request + "\u0000es");
+    if (!fileUrl) {
+        for (let filePath of tsConfig.paseAlias(request)) {
+            try {
+                const info = await fsp.stat(filePath);
+                if (info.isFile()) {
+                    fileUrl = pathToFileURL(filePath).toString();
+                    break;
+                } else if (info.isDirectory()) {
+                    if (tryDir) {
+                        fileUrl = await tryDirMod(filePath);
+                        if (fileUrl) break;
+                    }
+                } else if (extList && extList.length) {
+                    let res = await tryWithoutExt(filePath);
+                    if (res) return res;
+                    fileUrl = await tryFile(filePath, extList);
+                    if (fileUrl) break;
+                }
+            } catch (error) {
+                if (extList && extList.length) {
+                    let res = await tryWithoutExt(filePath);
+                    if (res) return res;
+                    fileUrl = await tryFile(filePath, extList);
+                    if (fileUrl) break;
+                }
+            }
+        }
+        if (fileUrl) tsConfig.setAliasCache(request + "\u0000es", fileUrl);
+    }
+
+    if (fileUrl) return { url: fileUrl, shortCircuit: true, format: pkg.getFileFormat(fileUrl) };
 }
 
 export async function resolveEntryFile(urlString: string): Promise<ResolveFxReturn | undefined> {

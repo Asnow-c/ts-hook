@@ -44,16 +44,11 @@ export class Pkg implements PackageConfig {
     get defaultFormat(): PkgFormat {
         return this.type === "module" ? "module" : "commonjs";
     }
-
-    tryTsAliasSync(importerPathname: string, request: string) {
-        const tsConfig = TsCompilerConfig.getTsCompilerConfigSync(this.pkgPath, this.pkgConfig);
-        if (!tsConfig) return;
-        return tsConfig.paseAliasSync(importerPathname, request);
+    getTsConfigSync() {
+        return TsCompilerConfig.getTsCompilerConfigSync(this.pkgPath, this.pkgConfig);
     }
-    async tryTsAlias(importerPathname: string, request: string) {
-        const tsConfig = await TsCompilerConfig.getTsCompilerConfig(this.pkgPath, this.pkgConfig);
-        if (!tsConfig) return;
-        return tsConfig.paseAlias(importerPathname, request);
+    getTsConfig() {
+        return TsCompilerConfig.getTsCompilerConfig(this.pkgPath, this.pkgConfig);
     }
 }
 
@@ -94,60 +89,43 @@ export class TsCompilerConfig {
         return instance;
     }
     private alias = new Map<RegExp, string[]>();
-    private constructor(
-        private readonly pkgPath: string,
-        private readonly pkgConfig: PackageConfig,
-        private readonly options: ts.CompilerOptions
-    ) {
+    constructor(private readonly pkgPath: string, pkgConfig: PackageConfig, options: ts.CompilerOptions) {
+        const baseUrl = options.baseUrl ? Path.resolve(pkgPath, options.baseUrl) : pkgPath;
         const tsPaths = options.paths;
         if (!tsPaths) return;
         const alias = this.alias;
-        for (const key of Object.keys(tsPaths)) {
-            const split = key.replace(/\*/, "(.*)");
-            alias.set(new RegExp(split), tsPaths[key]);
+        for (const [key, values] of Object.entries(tsPaths)) {
+            if (!values?.length) continue;
+            for (let i = 0; i < values.length; i++) {
+                let item = values[i];
+                values[i] = Path.resolve(baseUrl, item);
+            }
+            const split = "^" + key.replace(/\*/, "(.+)") + "$";
+            alias.set(new RegExp(split), values);
         }
     }
     private aliasCache = new Map<string, string>();
-    findAliasCache(importer: string, alias: string) {
-        return this.aliasCache.get(Path.resolve(importer, "..") + "\x00" + alias);
-    }
-    paseAliasSync(importer: string, alias: string) {
-        for (const [regExp, maps] of this.alias) {
-            const vab = alias.match(regExp)?.[1];
-            if (!vab) continue;
-            for (const map of maps) {
-                let filename = Path.resolve(this.pkgPath, map.replace(/\*/g, vab));
-                if (!filename.endsWith(".ts")) filename += ".ts";
 
-                const info = fs.statSync(filename);
-                if (info.isFile()) {
-                    this.aliasCache.set(Path.resolve(importer, "..") + "\x00" + alias, filename);
-                    return filename;
-                } else if (info.isDirectory()) {
-                    //todo:解析目录
+    findAliasCache(request: string) {
+        return this.aliasCache.get(request);
+    }
+    setAliasCache(request: string, filename: string) {
+        return this.aliasCache.set(request, filename);
+    }
+    *paseAlias(alias: string) {
+        for (const [regExp, maps] of this.alias) {
+            let res = alias.match(regExp);
+            if (!res) continue;
+            for (const map of maps) {
+                if (map.includes("*")) {
+                    let vab = res[1];
+                    if (!vab) continue;
+                    yield Path.resolve(this.pkgPath, map.replace(/\*/g, vab));
+                } else {
+                    return maps;
                 }
             }
         }
-        return null;
-    }
-    async paseAlias(importer: string, alias: string) {
-        for (const [regExp, maps] of this.alias) {
-            const vab = alias.match(regExp)?.[1];
-            if (!vab) continue;
-            for (const map of maps) {
-                let filename = Path.resolve(this.pkgPath, map.replace(/\*/g, vab));
-                if (!filename.endsWith(".ts")) filename += ".ts";
-
-                const info = await fsp.stat(filename);
-                if (info.isFile()) {
-                    this.aliasCache.set(Path.resolve(importer, "..") + "\x00" + alias, filename);
-                    return filename;
-                } else if (info.isDirectory()) {
-                    //todo:解析目录
-                }
-            }
-        }
-        return null;
     }
 }
 

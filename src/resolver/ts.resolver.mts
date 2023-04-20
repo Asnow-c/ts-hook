@@ -35,7 +35,7 @@ export async function resolve(
         if (result) return result;
     }
     if (hookConfig.enableTsAlias) {
-        let result = await tryTsAlias(specifier, fileURLToPath(parentURL));
+        let result = await tryTsAlias(specifier, fileURLToPath(parentURL), [".js", ".ts", ".json"], true);
         if (result) return result;
     }
     throw error;
@@ -70,11 +70,11 @@ ExtraModule._resolveFilename = function _resolveFilename(
                 error.message
             )?.groups;
         let pkgPath = error.path;
-        if (!groups || !pkgPath) throw error;
-        const { resolvedPath, isMain } = groups;
-
-        let filename = tryWithoutExtSync(resolvedPath);
-        if (filename) return filename;
+        if (groups && pkgPath) {
+            const { resolvedPath, isMain } = groups;
+            let filename = tryWithoutExtSync(resolvedPath);
+            if (filename) return filename;
+        }
 
         if (hookConfig.enableTsAlias) {
             let pathname = tryTsAliasSync(request, parent.path);
