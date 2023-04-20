@@ -1,0 +1,52 @@
+{
+    // 使用 IntelliSense 了解相关属性。
+    // 悬停以查看现有属性的描述。
+    // 欲了解更多信息，请访问: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "hookTest",
+            "runtimeArgs": ["--experimental-loader", "./hook.mjs"],
+            "skipFiles": [],
+            "sourceMaps": true,
+            "program": "${relativeFile}"
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "hookTest-env",
+            "runtimeArgs": ["--experimental-loader", "./hook.mjs"],
+            "skipFiles": [],
+            "env": {
+                "ENABLE_TS_ALIAS": "${input:ENABLE_TS_ALIAS}",
+                "SAME_PARSER": "${input:SAME_PARSER}"
+            },
+            "sourceMaps": true,
+            "program": "${relativeFile}"
+        }
+    ],
+    "inputs": [
+        {
+            "id": "ENABLE_TS_ALIAS", //id，在引用时使用
+            "type": "pickString",
+            "description": "是否开启ts路径别名",
+            "default": "",
+            "options": [
+                { "label": "true", "value": "true" },
+                { "label": "false", "value": "" }
+            ]
+        },
+        {
+            "id": "SAME_PARSER", //id，在引用时使用
+            "type": "pickString",
+            "description": "是否开启相同解析",
+            "default": "",
+            "options": [
+                { "label": "true", "value": "true" },
+                { "label": "false", "value": "" }
+            ]
+        }
+    ]
+}

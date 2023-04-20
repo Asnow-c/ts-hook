@@ -1,0 +1,14 @@
+{
+    "name": "import_self",
+    "description": "description",
+    "authors": "author",
+    "version": "1.0.0",
+    "dependencies": {},
+    "exports": {
+        "./*": "./*.js",
+        ".": {
+            "import": "./src/import_self.mts",
+            "require": "./src/import_self.cts"
+        }
+    }
+}
