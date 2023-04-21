@@ -1,19 +1,19 @@
 import Module from "node:module";
 import { fileURLToPath } from "url";
-import { isTsPath as isTsUrl } from "../util/tslib.mjs";
-import { ExtraModule, resolveEntryFile, tryTsAlias, EsmErrorHandler, CommonAdapter } from "../internal/esm_loader.mjs";
-import { tryTsAliasSync, tryWithoutExtSync } from "../internal/cjs_loader.mjs";
-import { ModResolveError } from "../internal/common_loader.mjs";
-import { hookConfig } from "../util/hook_config.mjs";
-import { toAbsPath } from "../util/file_tool.mjs";
+import { isTsPath as isTsUrl } from "./util/tslib.mjs";
+import { resolveEntryFile, tryTsAlias, EsmErrorHandler, CommonAdapter } from "./internal/esm_loader.mjs";
+import { tryTsAliasSync, tryWithoutExtSync } from "./internal/cjs_loader.mjs";
+import { ExtraModule, ModResolveError } from "./internal/common_loader.mjs";
+import { hookConfig } from "./hook_config.mjs";
+import { toAbsPath } from "./util/file_tool.mjs";
 
 const errorHandler = hookConfig.sameParsing ? new CommonAdapter() : new EsmErrorHandler();
 
 export async function resolve(
     specifier: string,
-    context: ResolveContext,
-    nextResolve: NextResolveFx
-): Promise<ResolveFxReturn> {
+    context: NodeLoader.ResolveContext,
+    nextResolve: NodeLoader.NextResolveFx
+): Promise<NodeLoader.ResolveFxReturn> {
     const { parentURL } = context;
 
     if (!parentURL) {

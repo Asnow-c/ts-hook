@@ -5,7 +5,6 @@ import * as fs from "node:fs";
 import type * as ts from "typescript";
 import * as Path from "node:path";
 import { CodeError } from "./errors/error.mjs";
-export const ExtraModule = Module as ExtraModule;
 
 export class Pkg implements PackageConfig {
     static upSearchPkg(startPath: string, suffix: string = "") {
@@ -28,7 +27,7 @@ export class Pkg implements PackageConfig {
         this.imports = pkgConfig.imports;
         this.exports = pkgConfig.exports;
     }
-    getFileFormat(filename: string): PkgFormat {
+    getFileFormat(filename: string): NodeLoader.Format {
         const { ext } = Path.parse(filename);
         if (ext === ".cts" || ".cjs") return "commonjs";
         else if (ext === ".mts" || ".mjs") return "module";
@@ -41,7 +40,7 @@ export class Pkg implements PackageConfig {
     imports?: Record<string, any>;
     type?: "commonjs" | "module" | undefined;
 
-    get defaultFormat(): PkgFormat {
+    get defaultFormat(): NodeLoader.Format {
         return this.type === "module" ? "module" : "commonjs";
     }
     getTsConfigSync() {
@@ -140,3 +139,32 @@ export function requestToNameAndSubPath(request: string) {
         };
     }
 }
+
+type ModuleClass = typeof import("node:module");
+export interface ExtraModule extends ModuleClass {
+    _readPackage(absPath: string): PackageConfig | undefined;
+    _findPath(request: string, paths: string[], isMain: boolean): undefined | string;
+    _resolveLookupPaths(request: string, parent: import("node:module")): string[];
+    _resolveFilename(
+        request: string,
+        parent: import("node:module") | undefined,
+        isMain: boolean,
+        options?: any
+    ): string | undefined;
+    _pathCache: Record<string, string>;
+    _cache: Record<string, ExtraModule>;
+}
+type PkgExportsItemValue = string | null | string[];
+type PkgExports = Record<
+    "imports" | "require" | "node" | "default" | "types" | "." | string,
+    Record<string, PkgExportsItemValue> | PkgExportsItemValue
+>;
+interface PackageConfig {
+    name?: string;
+    main?: string;
+    type?: "module" | "commonjs";
+    exports?: Record<string, any>;
+    imports?: Record<string, any>;
+}
+
+export const ExtraModule = Module as ExtraModule;
