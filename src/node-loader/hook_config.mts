@@ -5,3 +5,9 @@ export const hookConfig = {
 };
 
 export type HookConfig = typeof hookConfig;
+export interface ProcessEnv {
+    ENABLE_TS_ALIAS?: string;
+    SAME_PARSER?: string;
+    TS_COMPILER_OPTIONS?: string;
+    TS_CONFIG_PATH?: string;
+}

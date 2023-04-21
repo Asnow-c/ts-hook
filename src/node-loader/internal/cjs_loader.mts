@@ -1,10 +1,8 @@
 import * as Path from "node:path";
-import Module from "node:module";
 import type { Stats } from "node:fs";
 import * as fs from "node:fs";
-import { Pkg } from "./common_loader.mjs";
+import { Pkg, ExtraModule } from "./common_loader.mjs";
 import { ERR_REQUIRE_ESM } from "./errors/error.mjs";
-export const ExtraModule = Module as ExtraModule;
 
 export function tryWithoutExtSync(absPath: string) {
     let { ext } = Path.parse(absPath);

@@ -1,19 +1,17 @@
 import * as Path from "node:path";
-import Module from "node:module";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import type { Stats } from "node:fs";
 import * as fsp from "node:fs/promises";
-import { ModResolveError, Pkg, requestToNameAndSubPath } from "./common_loader.mjs";
+import { ModResolveError, Pkg, requestToNameAndSubPath, ExtraModule } from "./common_loader.mjs";
 import { toAbsPath } from "../util/file_tool.mjs";
-export const ExtraModule = Module as ExtraModule;
 
 //cjs和mjs扩展名规则
-export async function tryWithoutExt(absRequest: string): Promise<ResolveFxReturn | undefined> {
+export async function tryWithoutExt(absRequest: string): Promise<NodeLoader.ResolveFxReturn | undefined> {
     let { ext } = Path.parse(absRequest);
     let absPathWithoutExt = ext === "" ? absRequest : absRequest.slice(0, -ext.length);
 
     let fileUrl: string | undefined;
-    let format: PkgFormat;
+    let format: NodeLoader.Format;
     if (ext === ".mjs") {
         fileUrl = await tryFile(absPathWithoutExt, [".mts"]);
         format = "module";
@@ -65,7 +63,7 @@ export async function tryTs(resolvedPath: string) {
         filename = await tryFile(resolvedPath, [".ts"]);
         if (!filename) return;
     }
-    let format: PkgFormat =
+    let format: NodeLoader.Format =
         ExtraModule._readPackage(fileURLToPath(filename!))?.type === "module" ? "module" : "commonjs";
     return {
         url: filename!,
@@ -76,11 +74,11 @@ export async function tryTs(resolvedPath: string) {
 
 export async function tryTsAlias(
     request: string,
-    parentFilename: string,
+    parentDir: string,
     extList?: string[],
     tryDir?: boolean
-): Promise<ResolveFxReturn | undefined> {
-    const pkg = Pkg.upSearchPkg(Path.resolve(parentFilename, ".."));
+): Promise<NodeLoader.ResolveFxReturn | undefined> {
+    const pkg = Pkg.upSearchPkg(parentDir);
     if (!pkg) return;
     const tsConfig = await pkg?.getTsConfig();
     if (!tsConfig) return;
@@ -119,7 +117,7 @@ export async function tryTsAlias(
     if (fileUrl) return { url: fileUrl, shortCircuit: true, format: pkg.getFileFormat(fileUrl) };
 }
 
-export async function resolveEntryFile(urlString: string): Promise<ResolveFxReturn | undefined> {
+export async function resolveEntryFile(urlString: string): Promise<NodeLoader.ResolveFxReturn | undefined> {
     //入口文件
     let format = await getTsModule(fileURLToPath(urlString)); //format为undefined时说明入口文件不是ts文件
     if (format) {
@@ -130,7 +128,7 @@ export async function resolveEntryFile(urlString: string): Promise<ResolveFxRetu
         };
     }
 }
-async function getTsModule(filename: string): Promise<PkgFormat | undefined> {
+async function getTsModule(filename: string): Promise<NodeLoader.Format | undefined> {
     let ext = filename.match(/\.[cm]?ts$/)?.[0];
     if (ext) {
         if (ext === ".mts") return "module";
@@ -144,7 +142,7 @@ async function getTsModule(filename: string): Promise<PkgFormat | undefined> {
     }
 }
 
-type ForwardResult = ResolveFxReturn | undefined;
+type ForwardResult = NodeLoader.ResolveFxReturn | undefined;
 export class EsmErrorHandler {
     async forwardError(error: ModResolveError, specifier: string, parentUrl: string): Promise<ForwardResult> {
         switch (error.code) {

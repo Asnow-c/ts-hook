@@ -2,8 +2,8 @@ import * as Fsp from "node:fs/promises";
 import * as Path from "node:path";
 import BuiltinModule from "node:module";
 import { readFileSync } from "node:fs";
-import { compileTsCode } from "../util/compile.mjs";
-import { ModuleKind, ScriptTarget, isTsPath, paseConfigOptions } from "../util/tslib.mjs";
+import { compileTsCode } from "./util/compile.mjs";
+import { ModuleKind, ScriptTarget, isTsPath, paseConfigOptions } from "./util/tslib.mjs";
 import type ts from "typescript";
 const Module: Record<string, any> = BuiltinModule;
 
@@ -68,7 +68,11 @@ const TOP_OPTIONS = (function () {
 })();
 const DEFAULT_OPTIONS: ts.CompilerOptions = { ...DEFAULT_COMPILER_OPTIONS, ...TOP_OPTIONS };
 
-export async function load(url: string, context: LoadContext, nextLoad: NextLoadFx): Promise<LoadReturn> {
+export async function load(
+    url: string,
+    context: NodeLoader.LoadContext,
+    nextLoad: NodeLoader.NextLoadFx
+): Promise<NodeLoader.LoadReturn> {
     const { format } = context;
     if (format) {
         if (format === "commonjs") {
