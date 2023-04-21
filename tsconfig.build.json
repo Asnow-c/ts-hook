@@ -3,5 +3,5 @@
     "compilerOptions": {
         "skipLibCheck": true
     },
-    "exclude": ["**/test", "src/**/*.test.mts", "src/**/*.test.cts", "src/**/*.test.ts"]
+    "exclude": ["**/test","**/__test__", "src/**/*.test.mts", "src/**/*.test.cts", "src/**/*.test.ts"]
 }
