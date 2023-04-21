@@ -19,7 +19,8 @@ export function paseConfigOptions(textOptions: string, basicUrl: string) {
     return compilerOptions;
 }
 export function isTsPath(url: string) {
-    return /\.[mc]?ts$/.test(url);
+    if (url.endsWith(".ts") || url.endsWith(".cts") || url.endsWith(".mts")) return true;
+    return false;
 }
 enum ModuleKind {
     None = 0,

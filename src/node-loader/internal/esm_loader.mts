@@ -74,11 +74,11 @@ export async function tryTs(resolvedPath: string) {
 
 export async function tryTsAlias(
     request: string,
-    parentFilename: string,
+    parentDir: string,
     extList?: string[],
     tryDir?: boolean
 ): Promise<NodeLoader.ResolveFxReturn | undefined> {
-    const pkg = Pkg.upSearchPkg(Path.resolve(parentFilename, ".."));
+    const pkg = Pkg.upSearchPkg(parentDir);
     if (!pkg) return;
     const tsConfig = await pkg?.getTsConfig();
     if (!tsConfig) return;

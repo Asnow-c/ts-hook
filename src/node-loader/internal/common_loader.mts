@@ -7,6 +7,7 @@ import * as Path from "node:path";
 import { CodeError } from "./errors/error.mjs";
 
 export class Pkg implements PackageConfig {
+    //todo: 缓存策略
     static upSearchPkg(startPath: string, suffix: string = "") {
         for (const path of upSearch(startPath)) {
             let absPath = path + suffix;
