@@ -16,7 +16,7 @@ export const SourcemapMap = new Map();
     },
 });
 function tryCompiler() {
-    return import("../../complier/swc-complier.mjs").then(
+    return import("./swc-complier.mjs").then(
         function ({ transform, transformSync }) {
             return {
                 compiler: function swcCompiler(code: string, fileAbsPath: string, compilerOptions: ts.CompilerOptions) {

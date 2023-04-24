@@ -1,6 +1,6 @@
 import BuiltinModule from "node:module";
 import { readFileSync } from "node:fs";
-import { compileTsCode } from "./util/compile.mjs";
+import { compileTsCode } from "./compiler/compile.mjs";
 import { ModuleKind, isTsPath } from "./util/tslib.mjs";
 import { DEFAULT_OPTIONS } from "./hook_config.mjs";
 

@@ -1,8 +1,13 @@
 import type ts from "typescript";
 import * as Fsp from "node:fs/promises";
 import * as Path from "node:path";
-import { ScriptTarget, paseConfigOptions } from "./util/tslib.mjs";
-
+import { ScriptTarget, jsonToTsConfig, parseJson } from "./util/tslib.mjs";
+interface ProcessEnv {
+    ENABLE_TS_ALIAS?: string;
+    SAME_PARSER?: string;
+    TS_COMPILER_OPTIONS?: string;
+    TS_CONFIG_PATH?: string;
+}
 const env = process.env;
 export const hookConfig = {
     enableTsAlias: !!env["ENABLE_TS_ALIAS"],
@@ -10,12 +15,7 @@ export const hookConfig = {
 };
 
 export type HookConfig = typeof hookConfig;
-export interface ProcessEnv {
-    ENABLE_TS_ALIAS?: string;
-    SAME_PARSER?: string;
-    TS_COMPILER_OPTIONS?: string;
-    TS_CONFIG_PATH?: string;
-}
+
 /**
  * 配置优先级：addHook 的 topOptions 选项 > 环境变量中的 TS_COMPILER_OPTIONS > 环境变量 TS_CONFIG_PATH 指定的 tsconfig.json > 进程的 pwd 向上搜索到的 tsconfig.json
  * 配置的 module 选项：cts 强制为 commonJs，ets 强制为 ESNext, 如果package.json 中的 type 为 module，则 ts 强制为 ESNext
@@ -29,15 +29,15 @@ async function getDefaultCompilerOptions() {
     const envPath = process.env["TS_CONFIG_PATH"];
     if (envPath) {
         const configPath = Path.resolve(cwd, envPath);
-
-        let options = paseConfigOptions(await Fsp.readFile(configPath, "utf-8"), Path.resolve(configPath, ".."));
+        let json = parseJson(await Fsp.readFile(configPath, "utf-8")).compilerOptions;
+        let options = jsonToTsConfig(json, Path.resolve(configPath, ".."));
         Object.assign(compilerOptions, options);
     }
 
     //解析环境变量中的编译选项
     let fileContent = process.env["TS_COMPILER_OPTIONS"];
     if (fileContent) {
-        let options = paseConfigOptions(fileContent, "/TS_COMPILER_OPTIONS");
+        let options = jsonToTsConfig(parseJson(fileContent), "/TS_COMPILER_OPTIONS");
         Object.assign(compilerOptions, options);
     }
 
@@ -65,6 +65,7 @@ const TOP_OPTIONS = (function () {
 
         //涉及到运行结果
         experimentalDecorators: true,
+        emitDecoratorMetadata: true,
         // strict: true,
         target: TARGET,
         //module: [TsModuleKind.CommonJS, TsModuleKind.NodeNext, TsModuleKind.ESNext], 通过node版本进行确定
