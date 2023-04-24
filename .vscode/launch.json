@@ -25,6 +25,14 @@
             },
             "sourceMaps": true,
             "program": "${relativeFile}"
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "ttsc-plugin",
+            "skipFiles": ["<node_internals>/**"],
+            "program": "${relativeFile}",
+            "cwd": "${fileDirname}"
         }
     ],
     "inputs": [

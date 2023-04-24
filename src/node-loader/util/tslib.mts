@@ -1,23 +1,22 @@
-import {} from "typescript";
 import ts from "typescript";
 
 function convertCompilerOptionsFromJson(options: any, basicUrl: string) {
     return ts.convertCompilerOptionsFromJson(options, basicUrl);
 }
-
-export function paseConfigOptions(textOptions: string, basicUrl: string) {
-    let options;
+export function parseJson(text: string): Record<string, any> {
     try {
-        options = JSON.parse(textOptions).compilerOptions ?? {};
+        return JSON.parse(text) ?? {};
     } catch (error) {
-        throw new Error("无法解析" + textOptions + ": " + error);
+        throw new Error("无法解析" + text + ": " + error);
     }
-    if (!options.module) options.module = "ESNext";
-    let { options: compilerOptions, errors } = convertCompilerOptionsFromJson(options, basicUrl);
-    if (errors.length > 0)
-        throw new Error(textOptions + "配置不正确: " + errors.map((val) => val.messageText).join("\n\n"));
+}
+export function jsonToTsConfig(json: Record<string, any>, basicUrl: string) {
+    if (!json.module) json.module = "ESNext";
+    let { options: compilerOptions, errors } = convertCompilerOptionsFromJson(json, basicUrl);
+    if (errors.length > 0) throw new Error(json + "配置不正确: " + errors.map((val) => val.messageText).join("\n\n"));
     return compilerOptions;
 }
+
 export function isTsPath(url: string) {
     if (url.endsWith(".ts") || url.endsWith(".cts") || url.endsWith(".mts")) return true;
     return false;

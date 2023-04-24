@@ -2,7 +2,7 @@
 
 该钩子主要用于在开发环境中直接运行 typescript , 省去了编译步骤
 
-需要注意的是, 通过该钩子直接运行的 ts 文件, 不保证编译后也能运行
+> 要求 node 版本>=16
 
 全局安装: `npm install @asnc/ts_hook -g`
 项目安装: `npm install @asnc/ts_hook -D`
@@ -11,8 +11,8 @@
 用法: `node --loader GLOBAL_PATH/@asnc/ts_hook/hook.mjs  xx.mts`
 用法: `node --loader GLOBAL_PATH/@asnc/ts_hook/hook.mjs  xx.cts`
 
-注意: `GLOBAL_PATH`是你安装`@asnc/ts_hook`的所在目录的绝对或相对路径, 使用绝对路径时, Windows 系统下必须以`/`开头
-如 `/C:/npm_global/@asnc/ts_hook.mjs`, 使用相对路径时, 相对于 node 的启动目录, 且必须以`./`开头
+> 注意: `GLOBAL_PATH`是你安装`@asnc/ts_hook`的所在目录的绝对或相对路径, 使用绝对路径时, Windows 系统下必须以`/`开头
+> 如 `/C:/npm_global/@asnc/ts_hook.mjs`, 使用相对路径时, 相对于 node 的启动目录, 且必须以`./`开头
 
 ### 使用 ts-hook 的几种场景
 
@@ -69,7 +69,7 @@
         {
             "type": "node",
             "env": {    //注入环境变量
-                "TS_COMPILER_OPTIONS": "{'target':'esnext'}",
+                "TS_COMPILER_OPTIONS": "{\"target\":\"esnext\"}",
             },
             ...
         }
