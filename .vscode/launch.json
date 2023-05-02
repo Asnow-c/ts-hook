@@ -8,8 +8,7 @@
             "type": "node",
             "request": "launch",
             "name": "hookTest",
-            "runtimeArgs": ["--experimental-loader", "./hook.mjs"],
-            "skipFiles": [],
+            "runtimeArgs": ["--loader", "./hook.mjs"],
             "sourceMaps": true,
             "program": "${relativeFile}"
         },
@@ -17,35 +16,16 @@
             "type": "node",
             "request": "launch",
             "name": "hookTest-env",
-            "runtimeArgs": ["--experimental-loader", "./hook.mjs"],
+            "runtimeArgs": ["--loader", "./hook.mjs"],
             "skipFiles": [],
             "env": {
-                "ENABLE_TS_ALIAS": "${input:ENABLE_TS_ALIAS}",
                 "SAME_PARSER": "${input:SAME_PARSER}"
             },
             "sourceMaps": true,
             "program": "${relativeFile}"
-        },
-        {
-            "type": "node",
-            "request": "launch",
-            "name": "ttsc-plugin",
-            "skipFiles": ["<node_internals>/**"],
-            "program": "${relativeFile}",
-            "cwd": "${fileDirname}"
         }
     ],
     "inputs": [
-        {
-            "id": "ENABLE_TS_ALIAS", //id，在引用时使用
-            "type": "pickString",
-            "description": "是否开启ts路径别名",
-            "default": "",
-            "options": [
-                { "label": "true", "value": "true" },
-                { "label": "false", "value": "" }
-            ]
-        },
         {
             "id": "SAME_PARSER", //id，在引用时使用
             "type": "pickString",

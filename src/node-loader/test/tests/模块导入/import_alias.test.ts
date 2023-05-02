@@ -29,22 +29,22 @@ describe.concurrent("使用tsconfig的paths别名导入", function () {
     });
     describe.concurrent("开启路径别名导入", function () {
         it("cts-全路径别名", async function () {
-            let process = await Process.run(dir, "entry_full_ext.cts", { enableTsAlias: true });
+            let process = await Process.run(dir, "entry_full_ext.cts");
             expectPs(process).isSafeExit();
             expectPs(process).messageToEqual(["alias"]);
         });
         it("mts-全路径别名", async function () {
-            let process = await Process.run(dir, "entry_full_ext.mts", { enableTsAlias: true });
+            let process = await Process.run(dir, "entry_full_ext.mts");
             expectPs(process).isSafeExit();
             expectPs(process).messageToEqual(["alias"]);
         });
         it("cts-无扩展名别名", async function () {
-            let process = await Process.run(dir, "entry_no_ext.cts", { enableTsAlias: true });
+            let process = await Process.run(dir, "entry_no_ext.cts");
             expectPs(process).isSafeExit();
             expectPs(process).messageToEqual(["alias"]);
         });
         it("mts-无扩展名别名", async function () {
-            let process = await Process.run(dir, "entry_no_ext.mts", { enableTsAlias: true });
+            let process = await Process.run(dir, "entry_no_ext.mts");
             expectPs(process).isSafeExit();
             expectPs(process).messageToEqual(["alias"]);
         });

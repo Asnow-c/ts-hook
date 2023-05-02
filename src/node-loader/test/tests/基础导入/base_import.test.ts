@@ -18,6 +18,10 @@ describe.concurrent("cts", function () {
         expectPs(ps).isSafeExit();
         expectPs(ps).messageToEqual(["imported dir", "entry"]);
     });
+    it("动态导入mts", async function () {
+        const ps = await Process.run(meta.dir, "./cjs/a.cts");
+        expectPs(ps).isSafeExit();
+    });
 });
 describe.concurrent("mts", function () {
     it("完整扩展名导入", async function () {

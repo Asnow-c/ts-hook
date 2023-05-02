@@ -21,7 +21,7 @@ export async function tryWithoutExt(absRequest: string): Promise<NodeLoader.Reso
     } else if (ext === ".js") {
         fileUrl = await tryFile(absPathWithoutExt, [".ts"]);
         if (fileUrl) {
-            format = ExtraModule._readPackage(fileURLToPath(fileUrl))?.type === "module" ? "module" : "commonjs";
+            format = Pkg.upSearchPkg(fileURLToPath(fileUrl))?.defaultFormat ?? "commonjs";
         }
     }
     if (fileUrl) return { url: fileUrl, format: format!, shortCircuit: true };
@@ -80,7 +80,7 @@ export async function tryTsAlias(
 ): Promise<NodeLoader.ResolveFxReturn | undefined> {
     const pkg = Pkg.upSearchPkg(parentDir);
     if (!pkg) return;
-    const tsConfig = await pkg?.getTsConfig();
+    const tsConfig = await pkg.getTsConfig();
     if (!tsConfig) return;
 
     let fileUrl = tsConfig.findAliasCache(request + "\u0000es");
