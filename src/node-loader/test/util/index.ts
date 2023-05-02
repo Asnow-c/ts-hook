@@ -17,7 +17,6 @@ const loaderPath = "/" + Path.resolve(cwd, "hook.mjs");
 export class Process {
     private static hookConfigToEnv(config: Partial<HookConfig>) {
         let env: NodeJS.ProcessEnv = {};
-        if (config.enableTsAlias) env.ENABLE_TS_ALIAS = "true";
         if (config.sameParsing) env.SAME_PARSER = "true";
         return env;
     }
