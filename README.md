@@ -14,9 +14,11 @@
 > 注意: `GLOBAL_PATH`是你安装`@asnc/ts_hook`的所在目录的绝对或相对路径, 使用绝对路径时, Windows 系统下必须以`/`开头
 > 如 `/C:/npm_global/@asnc/ts_hook.mjs`, 使用相对路径时, 相对于 node 的启动目录, 且必须以`./`开头
 
+> 如果使用全局安装他`ts_hook`, 你需要全局安装 typescript 或 swc-core 其中的一个, 如果是项目安装`ts_hook`, 你需要在项目安装 typescript 或 swc-core, ts_hook 依赖他们, ts_hook 优先尝试导入 swc-core, 如果导入失败, 才会尝试导入 typescript, 你可以在通过配置进行选择
+
 ### 使用 ts-hook 的几种场景
 
--   快捷运行一些 ts 文件(当然, 其他工具更加完善如 ts-node、swc-node)
+-   快捷运行一些 ts 文件(当然, 如果纯运行 ts 文件, 其他工具更加完善如 ts-node、swc-node)
 -   对于 ES Module 项目的 ts 文件的 debugger
 
     对于 mts 文件或者 package.json 设置了 type="module"的项目, 往往 ts 文件的导入语法都是 import "./mod.js" 或者 import "./mod.mjs", 对于 ts-node 好像无法处理这种情况
@@ -30,10 +32,9 @@
 ### ts-hook 功能
 
 -   不提供类型检查
+-   可选 tsc 和 swc, 优先尝试 swc
 -   支持 package.json 的 imports、 exports、main 字段
--   不依赖 tsconfig.json
 -   根据 package.json 中的 type 和文件扩展名自动确定 ts 编译选项的 module
--   根据 node 版本自动确定 target
 -   支持源映射
 -   ES Module 可以使用了与 commonjs 一致的解析策略
 

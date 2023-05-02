@@ -6,10 +6,13 @@ interface ProcessEnv {
     SAME_PARSER?: string;
     TS_COMPILER_OPTIONS?: string;
     TS_CONFIG_PATH?: string;
+    COMPILER?: "swc" | "tsc";
 }
-const env = process.env;
+const env = process.env as ProcessEnv;
+if (env.COMPILER !== "swc" && env.COMPILER !== "tsc") delete env.COMPILER;
 export const hookConfig = {
     sameParsing: !!env["SAME_PARSER"],
+    compiler: env.COMPILER,
 };
 
 export type HookConfig = typeof hookConfig;
