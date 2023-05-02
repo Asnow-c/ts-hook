@@ -7,13 +7,22 @@ import * as Path from "node:path";
 import { CodeError } from "./errors/error.mjs";
 
 export class Pkg implements PackageConfig {
-    //todo: 缓存策略
+    private static pkgSearchCache = new Map<string, string | null>();
+
     static upSearchPkg(startPath: string, suffix: string = "") {
+        let pkgPath = this.pkgSearchCache.get(startPath);
+        if (pkgPath) return this.getPkg(pkgPath);
+        else if (pkgPath === null) return;
+
         for (const path of upSearch(startPath)) {
             let absPath = path + suffix;
             let pkg = this.getPkg(absPath);
-            if (pkg) return pkg;
+            if (pkg) {
+                this.pkgSearchCache.set(startPath, absPath);
+                return pkg;
+            }
         }
+        this.pkgSearchCache.set(startPath, null);
     }
     static getPkg(absPkgPath: string) {
         let pkgConfig = ExtraModule._readPackage(absPkgPath);

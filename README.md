@@ -25,8 +25,7 @@
 
     假如有一个使用 typescript 编写的库函数, 名字为 pkgLib, 当项目导入了这个 pkgLib 时, 如果此时想调试这个项目, pkgLib 必须经过编译, 否则无法运行
 
--   tsconfig paths 路径别名处理
-    需要开启 `ENABLE_TS_ALIAS`, 开启后可以处理路径别名的导入
+-   tsconfig paths 路径别名处理. 注意仅查与 package.json 同目录下的 tsconfig.json
 
 ### ts-hook 功能
 
@@ -43,12 +42,6 @@
 配置需要从环境变量注入
 
 对于 boolean 类型: 设置`""`为 `false` 其他值均为 `true`
-
-##### ENABLE_TS_ALIAS: 是否开启 ts 路径别名的支持
-
-类型 `boolean` 默认 `false`
-
-开启后会当 ts 文件使用别名导入文件时, 如果 node 无法解析导入, 则会尝试根据 tsconfig.json 提供的 paths 去搜索, 注意, 查找的 tsconfig 文件 与 package.json 需要是同目录的
 
 ##### SAME_PARSER: ES Module 是否使用与 Commonjs 相同的解析策略
 

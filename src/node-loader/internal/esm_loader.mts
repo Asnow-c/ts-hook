@@ -80,7 +80,7 @@ export async function tryTsAlias(
 ): Promise<NodeLoader.ResolveFxReturn | undefined> {
     const pkg = Pkg.upSearchPkg(parentDir);
     if (!pkg) return;
-    const tsConfig = await pkg?.getTsConfig();
+    const tsConfig = await pkg.getTsConfig();
     if (!tsConfig) return;
 
     let fileUrl = tsConfig.findAliasCache(request + "\u0000es");

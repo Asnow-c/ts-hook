@@ -53,7 +53,7 @@ export async function resolve(
 
     //查找缓存
     const result = ResolveCache.tryEsCache(parentDir, specifier);
-    if (result) return ResolveCache.setEsCache(parentDir, specifier, result);
+    if (result) return result;
     else if (result === null) return nextResolve(specifier, context);
 
     let error: ModResolveError;
@@ -65,7 +65,7 @@ export async function resolve(
         const result = await errorHandler.forwardError(error, specifier, parentURL);
         if (result) return ResolveCache.setEsCache(parentDir, specifier, result);
     }
-    if (hookConfig.enableTsAlias) {
+    {
         const result = await tryTsAlias(specifier, parentDir, [".js", ".ts", ".json"], true);
         if (result) return ResolveCache.setEsCache(parentDir, specifier, result);
     }
@@ -116,7 +116,7 @@ ExtraModule._resolveFilename = function _resolveFilename(
             if (filename) return ResolveCache.setCjsCache(parentDir, request, filename);
         }
 
-        if (hookConfig.enableTsAlias) {
+        {
             let filename = tryTsAliasSync(request, parent.path);
             if (filename) return ResolveCache.setCjsCache(parentDir, request, filename);
         }
