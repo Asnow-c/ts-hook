@@ -10,7 +10,6 @@ export function resolveJsPath(meta: ImportMeta) {
     return { file, dir };
 }
 
-const dir = resolveJsPath(import.meta).dir;
 const cwd = process.cwd();
 const loaderPath = "/" + Path.resolve(cwd, "hook.mjs");
 

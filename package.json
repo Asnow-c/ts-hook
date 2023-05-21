@@ -1,7 +1,7 @@
 {
     "name": "@asnc/ts_hook",
     "main": "./out/complier/index.js",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "publishConfig": {
         "access": "public",
         "registry": "https://registry.npmjs.org/"
