@@ -89,7 +89,6 @@ vscode 调试配置, 可以注入环境变量
             "name": "ts debugger",
             "runtimeArgs": ["--loader", "./node_modules/@asnc/ts_hook/hook.mjs"], //使用loader
             "env": {    //注入环境变量
-                "ENABLE_TS_ALIAS": "true",
                 "SAME_PARSER": ""           //设置"" 即false
             },
             "sourceMaps": true,

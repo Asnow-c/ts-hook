@@ -19,6 +19,7 @@ describe.concurrent("使用别名导入", function () {
 
 describe.concurrent("使用tsconfig的paths别名导入", function () {
     const dir = meta.dir + "/import_alias/ts_paths_alias";
+    //todo
     it("cts", async function () {
         let process = await Process.run(dir, "entry.cts");
         expect(process.exit?.code).toBe(1);

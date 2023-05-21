@@ -1,10 +1,9 @@
 import Module from "node:module";
-import { upSearch } from "../util/file_tool.mjs";
+import { upSearch } from "../util/file_tool";
 import * as fsp from "node:fs/promises";
 import * as fs from "node:fs";
 import type * as ts from "typescript";
 import * as Path from "node:path";
-import { CodeError } from "./errors/error.mjs";
 
 export class Pkg implements PackageConfig {
     private static pkgSearchCache = new Map<string, string | null>();
@@ -138,7 +137,7 @@ export class TsCompilerConfig {
     }
 }
 
-export type ModResolveError = CodeError & { path?: string; requireStack?: string[] };
+export type ModResolveError = Error & { code: string; path?: string; requireStack?: string[] };
 
 export function requestToNameAndSubPath(request: string) {
     const res = /^((?:@[^/\\%]+\/)?[^./\\%][^/\\%]*)(\/.*)?$/.exec(request);

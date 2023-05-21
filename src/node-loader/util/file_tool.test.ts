@@ -1,4 +1,4 @@
-import { upSearch } from "./file_tool.mjs";
+import { upSearch } from "./file_tool.js";
 import { it, describe, expect } from "vitest";
 
 describe("upSearch", function () {

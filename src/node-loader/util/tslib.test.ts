@@ -1,5 +1,5 @@
 import { it, describe, expect } from "vitest";
-import { jsonToTsConfig, ScriptTarget } from "./tslib.mjs";
+import { jsonToTsConfig, ScriptTarget } from "./tslib.js";
 
 describe("toConfig", function () {
     it("target", function () {
