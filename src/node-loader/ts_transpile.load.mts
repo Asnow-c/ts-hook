@@ -1,10 +1,6 @@
-import BuiltinModule from "node:module";
-import { readFileSync } from "node:fs";
-import { compileTsCode, compileTsCodeSync } from "./compiler/compile.mjs";
-import { ModuleKind, isTsPath } from "./util/tslib.mjs";
-import { DEFAULT_OPTIONS } from "./hook_config.mjs";
-
-const Module: Record<string, any> = BuiltinModule;
+import { compileTsCode } from "./compiler/compile.mjs";
+import { ModuleKind, isTsPath } from "./util/tslib.js";
+import { DEFAULT_OPTIONS } from "./hook_config.cjs";
 
 export async function load(
     url: string,
@@ -35,14 +31,3 @@ export async function load(
 
     return nextLoad(url, context);
 }
-
-function tsc(this: typeof Module, module: typeof Module, fileName: string) {
-    const code = compileTsCodeSync(readFileSync(fileName, "utf-8"), fileName, {
-        ...DEFAULT_OPTIONS,
-        module: ModuleKind.NodeNext, //node import() 支持
-    });
-
-    module._compile(code, fileName);
-}
-Module._extensions[".ts"] = tsc;
-Module._extensions[".cts"] = tsc;

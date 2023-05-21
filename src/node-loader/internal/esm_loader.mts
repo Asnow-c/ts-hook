@@ -2,8 +2,8 @@ import * as Path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import type { Stats } from "node:fs";
 import * as fsp from "node:fs/promises";
-import { ModResolveError, Pkg, requestToNameAndSubPath, ExtraModule } from "./common_loader.mjs";
-import { toAbsPath } from "../util/file_tool.mjs";
+import { ExtraModule, type ModResolveError, Pkg, requestToNameAndSubPath } from "./common_loader.js";
+import { toAbsPath } from "../util/file_tool.js";
 
 //cjs和mjs扩展名规则
 export async function tryWithoutExt(absRequest: string): Promise<NodeLoader.ResolveFxReturn | undefined> {

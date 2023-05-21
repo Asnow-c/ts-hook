@@ -7,7 +7,7 @@ import {
     JscTarget,
 } from "@swc/core";
 import type ts from "typescript";
-import { ModuleKind, ScriptTarget } from "../util/tslib.mjs";
+import { ModuleKind, ScriptTarget } from "../util/tslib.js";
 
 const DEFAULT_ES_TARGET: JscTarget = "esnext";
 

@@ -1,10 +1,8 @@
-import { TsCompilerConfig } from "./common_loader.mjs";
+import { TsCompilerConfig } from "./common_loader";
 import { it, expect, describe } from "vitest";
 import type * as ts from "typescript";
 import * as Path from "node:path";
-import { fileURLToPath } from "node:url";
-const filename = fileURLToPath(import.meta.url);
-const dir = filename.slice(0, filename.lastIndexOf("/"));
+const dir = __dirname;
 function createInstance(config: ts.CompilerOptions) {
     return new TsCompilerConfig(dir, {}, config);
 }
@@ -12,6 +10,7 @@ function parseAlias(instance: TsCompilerConfig, alias: string) {
     for (const res of instance.paseAlias(alias)) {
         return res;
     }
+    
 }
 describe("别名解析", function () {
     it("无base", function () {

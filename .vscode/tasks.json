@@ -1,0 +1,18 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "hookRun",
+            "command": "node",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "type": "shell",
+            "args": ["--inspect-brk", "--loader", "./hook.mjs", "${relativeFile}"],
+            "presentation": {
+                "reveal": "always"
+            },
+            "group": "build"
+        }
+    ]
+}

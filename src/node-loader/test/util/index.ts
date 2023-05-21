@@ -2,7 +2,7 @@ import { fork, ChildProcess, ForkOptions } from "child_process";
 import { expect } from "vitest";
 import * as Path from "node:path";
 import { fileURLToPath } from "url";
-import { HookConfig } from "../../hook_config.mjs";
+import { HookConfig } from "../../hook_config.cjs";
 
 export function resolveJsPath(meta: ImportMeta) {
     let file = fileURLToPath(meta.url);
@@ -10,7 +10,6 @@ export function resolveJsPath(meta: ImportMeta) {
     return { file, dir };
 }
 
-const dir = resolveJsPath(import.meta).dir;
 const cwd = process.cwd();
 const loaderPath = "/" + Path.resolve(cwd, "hook.mjs");
 

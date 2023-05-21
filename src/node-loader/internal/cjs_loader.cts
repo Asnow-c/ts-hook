@@ -1,8 +1,7 @@
 import * as Path from "node:path";
 import type { Stats } from "node:fs";
 import * as fs from "node:fs";
-import { Pkg, ExtraModule } from "./common_loader.mjs";
-import { ERR_REQUIRE_ESM } from "./errors/error.mjs";
+import { Pkg, ExtraModule } from "./common_loader";
 
 export function tryWithoutExtSync(absPath: string) {
     let { ext } = Path.parse(absPath);
@@ -70,4 +69,18 @@ export function tryTsAliasSync(request: string, parentDir: string): string | und
         tsConfig.setAliasCache(request + "\u0000c", filename);
         return filename;
     }
+}
+
+class ERR_REQUIRE_ESM extends Error {
+    constructor(filename: string, hasEsmSyntax: boolean, parentPath = null) {
+        let msg = `require() of ES Module ${filename}${parentPath ? ` from ${parentPath}` : ""} not supported.`;
+        if (filename.endsWith(".mjs"))
+            msg +=
+                `\nInstead change the require of ${filename} to a dynamic ` +
+                "import() which is available in all CommonJS modules.";
+
+        super(msg);
+        this.code = ERR_REQUIRE_ESM.name;
+    }
+    code: string;
 }

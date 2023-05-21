@@ -1,4 +1,7 @@
 {
     "typescript.tsdk": "node_modules\\typescript\\lib",
-    "npm.exclude": ["**/test/**","**/__test__/**"]
+    "npm.exclude": [
+        "**/test/**",
+        "**/__test__/**"
+    ]
 }

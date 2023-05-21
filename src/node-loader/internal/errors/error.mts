@@ -1,5 +1,4 @@
 import { fileURLToPath } from "node:url";
-import * as mod from "node:path";
 
 export class CodeError extends Error {
     constructor(msg: string, readonly code: string, options?: ErrorOptions) {
@@ -55,17 +54,6 @@ export class ERR_PACKAGE_IMPORT_NOT_DEFINED extends CodeError {
             } imported from ${base}`,
             ERR_PACKAGE_IMPORT_NOT_DEFINED.name
         );
-    }
-}
-
-export class ERR_REQUIRE_ESM extends CodeError {
-    constructor(filename: string, hasEsmSyntax: boolean, parentPath = null) {
-        let msg = `require() of ES Module ${filename}${parentPath ? ` from ${parentPath}` : ""} not supported.`;
-        if (filename.endsWith(".mjs"))
-            msg +=
-                `\nInstead change the require of ${filename} to a dynamic ` +
-                "import() which is available in all CommonJS modules.";
-        super(msg, ERR_REQUIRE_ESM.name);
     }
 }
 
