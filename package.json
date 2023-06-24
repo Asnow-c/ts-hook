@@ -12,7 +12,8 @@
     },
     "keywords": [
         "TypeScript",
-        "node"
+        "node",
+        "node loader"
     ],
     "description": "",
     "files": [

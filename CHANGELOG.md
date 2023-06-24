@@ -1,4 +1,10 @@
-## Unreleased (2023-05-02)
+## v0.1.1 (2023-06-24)
+
+### New feature:
+
+-   node v20 的支持([`a00d2ba`](https://github.com/Asnow-c/ts-hook/commit/a00d2ba5fa97cdc9c03a8bb1366f78f54a0acbe1)) (by Asnow)
+
+## v0.1.0 (2023-05-02)
 
 ### New feature:
 
