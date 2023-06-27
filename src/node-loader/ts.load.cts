@@ -7,7 +7,8 @@ import type ts from "typescript";
 function tryCompiler(compiler?: "swc" | "tsc") {
     if (compiler !== "tsc") {
         try {
-            const { transformSyncUseTsConfig } = require("./swc-complier.cjs");
+            const { transformSyncUseTsConfig } =
+                require("./compiler/swc-complier.cjs") as typeof import("./compiler/swc-complier.cjs");
             return transformSyncUseTsConfig;
         } catch (error) {
             if (compiler === "swc")

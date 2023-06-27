@@ -1,3 +1,9 @@
+## v0.1.2 (2023-06-27)
+
+### Bugs fixed:
+
+-   cts 导入 ts 编译器失败([`fd184f6`](https://github.com/Asnow-c/ts-hook/commit/fd184f678ffec4a524417ac0eb668c447f5ed360)) (by Asnow)
+
 ## v0.1.1 (2023-06-24)
 
 ### New feature:
