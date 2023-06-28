@@ -1,7 +1,7 @@
 import { fork, ChildProcess, ForkOptions } from "child_process";
 import { expect } from "vitest";
 import * as Path from "node:path";
-import { fileURLToPath } from "url";
+import { fileURLToPath, pathToFileURL } from "url";
 import { HookConfig } from "../../hook_config.cjs";
 
 export function resolveJsPath(meta: ImportMeta) {
@@ -11,7 +11,7 @@ export function resolveJsPath(meta: ImportMeta) {
 }
 
 const cwd = process.cwd();
-const loaderPath = "/" + Path.resolve(cwd, "hook.mjs");
+const loaderPath = pathToFileURL(cwd + "/hook.mjs").toString();
 
 export class Process {
     private static hookConfigToEnv(config: Partial<HookConfig>) {
