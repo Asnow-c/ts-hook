@@ -1,7 +1,7 @@
 {
     "name": "@asnc/ts_hook",
     "main": "./out/complier/index.js",
-    "version": "0.1.1",
+    "version": "0.1.3",
     "publishConfig": {
         "access": "public",
         "registry": "https://registry.npmjs.org/"
@@ -24,9 +24,10 @@
         "require.cjs"
     ],
     "scripts": {
-        "test": "vitest run",
         "build": "tsc -p ./tsconfig.build.json",
-        "clear": "rm -rfv ./out"
+        "publishTest": "pnpm publish --no-git-checks --dry-run",
+        "ci:build": "tsc -p ./tsconfig.build.json",
+        "ci:test": "vitest run"
     },
     "author": "asnow",
     "license": "MIT",
@@ -34,11 +35,10 @@
         "@swc/core": "^1.3.52",
         "@types/node": "^20.1.1",
         "typescript": "^4.9.4",
-        "vite": "^4.1.4",
-        "vitest": "^0.31.0"
+        "vitest": "^0.31.0",
+        "glob": "^10.2.2"
     },
     "dependencies": {
-        "glob": "^10.2.2",
         "source-map-support": "^0.5.21"
     },
     "engines": {
