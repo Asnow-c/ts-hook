@@ -24,9 +24,10 @@
         "require.cjs"
     ],
     "scripts": {
-        "test": "vitest run",
         "build": "tsc -p ./tsconfig.build.json",
-        "clear": "rm -rfv ./out"
+        "publishTest": "pnpm publish --no-git-checks --dry-run",
+        "ci:build": "tsc -p ./tsconfig.build.json",
+        "ci:test": "vitest run"
     },
     "author": "asnow",
     "license": "MIT",
