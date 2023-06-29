@@ -1,6 +1,8 @@
 import type ts from "typescript";
 import * as sourceMapSupport from "source-map-support";
 import { hookConfig } from "../hook_config.cjs";
+import { CompileImportError, NoCompileError } from "./errors.cjs";
+
 export const SourcemapMap = new Map();
 (sourceMapSupport as any).install({
     // handleUncaughtExceptions: false,
@@ -22,8 +24,7 @@ async function tryCompiler(compiler?: "swc" | "tsc") {
             const { transformUseTsConfig } = await import("./swc-complier.cjs");
             return transformUseTsConfig;
         } catch (error) {
-            if (compiler === "swc")
-                throw new Error("你选择了swc编译器, 但是无法导入swc-core包, 请确保你已经安装swc-core");
+            if (compiler === "swc") throw new CompileImportError("@swc/core");
         }
     }
 
@@ -33,11 +34,10 @@ async function tryCompiler(compiler?: "swc" | "tsc") {
         } = await import("typescript");
         return async (...args: Parameters<typeof transpileModule>) => transpileModule(...args);
     } catch (error) {
-        if (compiler === "tsc")
-            throw new Error("你选择了tsc编译器, 但是无法导入 typescript 包, 请确保你已经安装 typescript");
+        if (compiler === "tsc") throw new CompileImportError("typescript");
     }
 
-    throw new Error("loader 依赖 typescript 或 swc-core, 你必须至少安装一个编译器");
+    throw new NoCompileError();
 }
 const transform = await tryCompiler(hookConfig.compiler);
 
