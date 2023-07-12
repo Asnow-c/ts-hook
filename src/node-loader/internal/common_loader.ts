@@ -25,8 +25,9 @@ export class Pkg implements PackageConfig {
     }
     static getPkg(absPkgPath: string) {
         let pkgConfig = ExtraModule._readPackage(absPkgPath);
-        if (pkgConfig) return new this(pkgConfig, absPkgPath);
-        else undefined;
+        if (!pkgConfig || (Object.hasOwn(pkgConfig, "exists") && pkgConfig.exists === false)) return;
+
+        return new this(pkgConfig, absPkgPath);
     }
     private constructor(private pkgConfig: PackageConfig, readonly pkgPath: string) {
         if (typeof pkgConfig.exports === "string") pkgConfig.exports = { ".": pkgConfig.exports };
@@ -174,6 +175,8 @@ interface PackageConfig {
     type?: "module" | "commonjs";
     exports?: Record<string, any>;
     imports?: Record<string, any>;
+    /** node 20 新增 */
+    exists?: boolean;
 }
 
 export const ExtraModule = Module as ExtraModule;

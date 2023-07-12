@@ -1,1 +1,2 @@
-console.log(import.meta.url as any);
+async function fx() {}
+await fx();

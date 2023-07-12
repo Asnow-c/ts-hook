@@ -24,7 +24,7 @@ describe.concurrent("测试入口文件", function () {
         expectPs(process).isSafeExit();
     });
     it("运行type:module的包", async function () {
-        let process = await Process.run(meta.dir, "pkg_mjs/main.ts");
+        let process = await Process.run(meta.dir, "pkg_mjs/deep/file.ts");
         expectPs(process).isSafeExit();
     });
     it("运行type:commonjs的包", async function () {
