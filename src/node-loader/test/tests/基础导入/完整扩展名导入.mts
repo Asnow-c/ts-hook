@@ -3,7 +3,7 @@ async function imports() {
     await import("./exports/mod_cts.cjs");
     await import("./exports/mod_esm.mjs");
 
-    console.log(import.meta.url as any);
+    console.log(import.meta as any);
 
     process.send?.("entry");
 }

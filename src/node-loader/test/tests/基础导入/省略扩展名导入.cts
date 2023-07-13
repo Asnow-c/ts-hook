@@ -1,4 +1,4 @@
 import "./exports/mod_ts";
-console.log(__dirname as any);
+console.log(exports as any);
 
-process.send!("entry");
+process.send?.("entry");
