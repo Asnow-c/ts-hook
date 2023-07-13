@@ -1,68 +1,107 @@
-# ts-hook
+**English** | [中文](https://github.com/asnow-c/ts-hook/blob/main/docs/zh/README.md)
 
-该钩子主要用于在开发环境中直接运行 typescript , 省去了编译步骤
+## ts_hook
 
-> 要求 node 版本>=16
+This hook is primarily used to run typescript directly in the development environment, eliminating the compilation step
 
-全局安装: `npm install @asnc/ts_hook -g`\
-项目安装: `npm install @asnc/ts_hook -D`
+> Required node version >= 16
 
-用法: `node --loader GLOBAL_PATH/@asnc/ts_hook/hook.mjs  xx.ts`\
-用法: `node --loader GLOBAL_PATH/@asnc/ts_hook/hook.mjs  xx.mts`\
-用法: `node --loader GLOBAL_PATH/@asnc/ts_hook/hook.mjs  xx.cts`
+Global install: `npm install @asnc/ts_hook -g`\
+Project install: `npm install @asnc/ts_hook -D`
 
-> 注意: `GLOBAL_PATH`是你安装`@asnc/ts_hook`的所在目录的绝对或相对路径, 使用绝对路径时, Windows 系统下必须以`/`开头
-> 如 `/C:/npm_global/@asnc/ts_hook.mjs`, 使用相对路径时, 相对于 node 的启动目录, 且必须以`./`开头
+Usage: `node --loader MODULE_PATH/@asnc/ts_hook/hook.mjs  xx.ts`\
+Usage: `node --loader MODULE_PATH/@asnc/ts_hook/hook.mjs  xx.mts`\
+Usage: `node --loader MODULE_PATH/@asnc/ts_hook/hook.mjs  xx.cts`\
+Usage: `node --loader @asnc/ts_hook/hook.mjs  xx.cts` (Project level use)\
 
-> 如果使用全局安装他`ts_hook`, 你需要全局安装 typescript 或 swc-core 其中的一个, 如果是项目安装`ts_hook`, 你需要在项目安装 typescript 或 swc-core, ts_hook 依赖他们, ts_hook 优先尝试导入 swc-core, 如果导入失败, 才会尝试导入 typescript, 你可以在通过配置进行选择
+> Note: `MODULE_PATH` is the absolute or relative path to the directory where you installed @asnc/ts_hook. When using an absolute path, Windows must start with a `/`
+> Example `/C:/npm_global/@asnc/ts_hook.mjs`, when using a relative path, relative to the node's startup directory, and must start with `./`
 
-### 使用 ts-hook 的几种场景
+> If you use a global installation `@asnc/ts_hook`, you need to install one of the dependencies of typescript or `@swc/core` globally. If you use a project installation `@asnc/ts_hook`, you need to install typescript or `@swc/core` in your project. ts_hook relies on them. `@asnc/ts_hook` tries to import `@swc/core` first. If the import fails, it will try to import typescript
 
--   快捷运行一些 ts 文件(当然, 如果纯运行 ts 文件, 其他工具更加完善如 ts-node、swc-node)
--   对于 ES Module 项目的 ts 文件的 debugger
+### Compare with ts-node and @swc-node/register
 
-    对于 mts 文件或者 package.json 设置了 type="module"的项目, 往往 ts 文件的导入语法都是 import "./mod.js" 或者 import "./mod.mjs", 对于 ts-node 好像无法处理这种情况
+|                                                          | @asnc/ts_hook           | @swc-node/register       | ts-node    |
+| -------------------------------------------------------- | ----------------------- | ------------------------ | ---------- |
+| Dependencies                                             | typescript or @swc/core | typescript and @swc/core | typescript |
+| Type check                                               | No                      | No                       | Yes        |
+| Source map                                               | Yes                     | Yes                      | Yes        |
+| [Cross-package import](#Cross-package import) ts project | Yes                     | No                       | No         |
+| Mix esm and commonjs                                     | Yes                     |                          | Yes        |
+| [Path alias](#Path alias)                                | Yes                     | Yes in some cases        | No         |
 
--   直接运行导入了 ts 库的 ts 文件
+#### Cross-package import
 
-    假如有一个使用 typescript 编写的库函数, 名字为 pkgLib, 当项目导入了这个 pkgLib 时, 如果此时想调试这个项目, pkgLib 必须经过编译, 否则无法运行
+In the monorepo project, we develop multiple packages in Typescript at the same time, and they may reference each other
+When using a Node debugger package in this scenario, we must compile the package with the packages in the project on which it depends
+while
+If you use ts-node or @swc-node/register, you only need to compile the package on which it depends, because their hooks don't compile on external dependencies
+And this is very inconvenient
+So @asnc/ts_hook solves this problem. @asnc/ts_hook tracks the import of all` .ts` `.mts` `.cts ` files
 
--   tsconfig paths 路径别名处理. 注意仅查与 package.json 同目录下的 tsconfig.json
+#### Mix esm and commonjs
 
-### ts-hook 功能
-
--   不提供类型检查
--   可选 tsc 和 swc, 优先尝试 swc
--   支持 package.json 的 imports、 exports、main 字段
--   根据 package.json 中的 type 和文件扩展名自动确定 ts 编译选项的 module
--   支持源映射
--   ES Module 可以使用了与 commonjs 一致的解析策略
-
-### 配置
-
-配置需要从环境变量注入
-
-对于 boolean 类型: 设置`""`为 `false` 其他值均为 `true`
-
-##### SAME_PARSER: ES Module 是否使用与 Commonjs 相同的解析策略
-
-类型 `boolean` 默认 `false`
-开启后 ES Module 将使用与 Commonjs 相同的模块解析策略
-
-##### TS_COMPILER_OPTIONS: 全局的 ts 文件编译配置
-
-类型 `string`
-
-注意: 有些配置是会被覆盖的
-
-例子: vscode debugger 配置
+The following directories are available:
 
 ```
+work
+- index.mts
+- esm.mts
+- cjs.tsc
+```
+
+index.mts:
+
+```typescript
+import "./cjs.cjs";
+import "./esm.mjs";
+console.log(__dirname);
+```
+
+@swc-node/register cannot resolve this full path import
+
+#### Path alias
+
+In many cases we set the paths field in tsconfig.json
+@swc-node/register only looks for the paths field of the tsconfig.json file in the working directory at run time. If the working directory is not in the project at run time, this means that @swc-node/register cannot read the alias configuration. Unless shown setting alias
+
+@asnc/ts_hooks support alias configuration in project-level tsconfig.json (needs to be in the same directory as package.json)
+
+### ts-hook features
+
+-   Type checking is not provided
+-   Optional tsc and swc compiler, try to import swc compiler first
+-   Supports the imports, exports, and main fields of package.json
+    -   If the file id parsed through these fields ends with the extension `.js` `.mjs` `.cjs` and the file does not exist, the extension will be replaced with `.ts` `.mts` `.cts` and the import attempt will be made
+        The module compilation option for -ts is fixed to NodeNext
+-   Supports source mapping
+-   ES Module can use the same parsing strategy as commonjs
+
+### Configuration
+
+The configuration needs to be injected from environment variables
+
+For boolean type: Set `""` to `false` and all other values to `true`
+
+##### SAME_PARSER: Does ES Module use the same parsing strategy as Commonjs
+
+Type: `boolean` default `false`
+When enabled, ES Module will use the same module resolution strategy as Commonjs
+
+##### TS_COMPILER_OPTIONS: Global ts file compilation configuration
+
+Type: `string`
+
+Note: Some configurations are overwritten
+
+Example: vscode debugger configuration
+
+```json
 {
     "configurations": [
         {
             "type": "node",
-            "env": {    //注入环境变量
+            "env": {    //Injected environment variable
                 "TS_COMPILER_OPTIONS": "{\"target\":\"esnext\"}",
             },
             ...
@@ -71,15 +110,17 @@
 }
 ```
 
-##### TS_CONFIG_PATH: 全局 ts 文件编译的配置文件
+##### TS_CONFIG_PATH: Global ts file compiled configuration file path
 
-类型 `string`
+Type: `string`
 
-#### 配置案例
+Note: Some configurations are overwritten
 
-vscode 调试配置, 可以注入环境变量
+#### Configuration example
 
-```
+vscode debug configuration, you can inject environment variables
+
+```json
 {
     "version": "0.2.0",
     "configurations": [
@@ -87,43 +128,14 @@ vscode 调试配置, 可以注入环境变量
             "type": "node",
             "request": "launch",
             "name": "ts debugger",
-            "runtimeArgs": ["--loader", "./node_modules/@asnc/ts_hook/hook.mjs"], //使用loader
-            "env": {    //注入环境变量
-                "SAME_PARSER": ""           //设置"" 即false
+            "runtimeArgs": ["--loader", "./node_modules/@asnc/ts_hook/hook.mjs"], //Use loader
+            //Injected environment variable
+            "env": {
+                "SAME_PARSER": "" //Set "" which is true
             },
             "sourceMaps": true,
             "program": "${file}"
         }
     ]
 }
-
-```
-
-### node 导入模块的几种情况
-
--   直接运行包名
-    ES Module 和 commonjs 的导入策略相同
-
--   使用绝对路径或相对路径导入
-    ES Module 不支持扩展名查找, 不支持文件夹模块
-
--   使用包名导入
-    ES Module 和 commonjs 的导入策略基本相同
-    不同点: 当 package.json 不存在 exports 字段时, commonjs 可以导入子目录而 ES Module 不能
-
--   导入自身包
-    ES Module 和 commonjs 的导入策略相同
-
--   使用'#'别名导入
-    ES Module 和 commonjs 的导入策略相同
-
-##### ts_hook 会尝试去除扩展名搜索 ts
-
-ts_hook 在 ts 文件导入带有 .js .cjs .mjs 的扩展名会尝试去除进行搜索 ts 文件, 包括 package.json 中的 exports、imports、main 字段的处理
-
-```
-import "./a.cjs"    //  "./a.cjs" > "./a.cts"   >   node解析规则 require("./a.cjs")
-import "./a.js"     //  "./a.js" > "./a.ts"     >   node解析规则 require("./a.js")
-import "./a.mjs"    //  "./a.mjs"> "./a.mts"    >   node解析规则 require("./a.mjs")
-
 ```
