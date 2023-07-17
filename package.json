@@ -1,14 +1,13 @@
 {
     "name": "@asnc/ts_hook",
-    "main": "./out/complier/index.js",
-    "version": "0.1.4",
+    "version": "0.1.5",
     "publishConfig": {
         "access": "public",
         "registry": "https://registry.npmjs.org/"
     },
     "repository": {
         "type": "git",
-        "url": "https://github.com/Asnow-c/ts-hook"
+        "url": "https://github.com/asnow-c/ts-hook"
     },
     "keywords": [
         "TypeScript",
