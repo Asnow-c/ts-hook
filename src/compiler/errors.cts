@@ -13,4 +13,3 @@ export class NoCompileError extends Error {
         );
     }
 }
-console.log(home);

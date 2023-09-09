@@ -10,4 +10,3 @@ export function getESVersion(): number {
     return version;
 }
 declare let Array: any;
-console.log(getESVersion());

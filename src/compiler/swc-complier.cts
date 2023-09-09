@@ -80,7 +80,7 @@ export function transform(source: string, path: string, options?: Options) {
 function TsConfigToSwcConfig(filename?: string, options: ts.CompilerOptions = {}): SwcOptions {
     const { target, module } = options;
     let swcTarget: JscTarget = (
-        target === ScriptTarget.ESNext ? "esnext" : ScriptTarget[target as any].toLowerCase()
+        (target as any as ScriptTarget) === ScriptTarget.ESNext ? "esnext" : ScriptTarget[target as any]?.toLowerCase()
     ) as any;
 
     let swcModule: string = "es6";

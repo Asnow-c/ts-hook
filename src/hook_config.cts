@@ -1,7 +1,6 @@
 import type ts from "typescript";
 import * as Path from "node:path";
-import { ModuleKind, jsonToTsConfig, parseJson, readTsConfigFileSync } from "./util/tslib.js";
-import { getESVersion } from "./lib/es.js";
+import { ModuleKind, ScriptTarget, jsonToTsConfig, parseJson, readTsConfigFileSync } from "./util/tslib.js";
 interface ProcessEnv {
     SAME_PARSER?: string;
     TS_COMPILER_OPTIONS?: string;
@@ -35,7 +34,7 @@ function getDefaultCompilerOptions() {
     //解析环境变量中的编译选项
     let fileContent = process.env["TS_COMPILER_OPTIONS"];
     if (fileContent) Object.assign(compilerOptions, jsonToTsConfig(parseJson(fileContent)));
-    if (!compilerOptions.target) compilerOptions.target = getESVersion() - 13;
+    if (!compilerOptions.target) compilerOptions.target = ScriptTarget.ES2022 as any;
     return compilerOptions;
 }
 const DEFAULT_COMPILER_OPTIONS = getDefaultCompilerOptions();

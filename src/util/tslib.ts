@@ -66,10 +66,10 @@ export function jsonToTsConfig(json: RawTsCompilerOptions, safe?: boolean) {
     let tsConfig: ts.CompilerOptions = { ...json };
     if (json.target) {
         let targetKey: any = (json.target as string).toUpperCase();
-        if (targetKey === "ESNEXT") tsConfig.target = ScriptTarget.ESNext;
-        else if (targetKey.startsWith("ES")) tsConfig.target = ScriptTarget[targetKey] as any as ScriptTarget;
-        else if (targetKey === "LATEST") tsConfig.target = ScriptTarget.Latest;
-        else if (targetKey === "JSON") tsConfig.target = ScriptTarget.JSON;
+        if (targetKey === "ESNEXT") tsConfig.target = ScriptTarget.ESNext as any;
+        else if (targetKey.startsWith("ES")) tsConfig.target = ScriptTarget[targetKey] as any;
+        else if (targetKey === "LATEST") tsConfig.target = ScriptTarget.Latest as any;
+        else if (targetKey === "JSON") tsConfig.target = ScriptTarget.JSON as any;
         else if (!safe) throw new FelidError("target");
     }
     if (json.moduleResolution) {
@@ -106,6 +106,8 @@ enum ScriptTarget {
     ES2020 = 7,
     ES2021 = 8,
     ES2022 = 9,
+    ES2023 = 10,
+    ES2024 = 11,
     ESNext = 99,
     JSON = 100,
     Latest = 99,
@@ -135,6 +137,10 @@ class FelidError extends Error {
         super(`The value of Field ${felid} is incorrect`);
     }
 }
+export type CompilerOptions = Omit<ts.CompilerOptions, "target" | "moduleResolution"> & {
+    target: ScriptTarget;
+    moduleResolution: ModuleKind;
+};
 export type RawTsCompilerOptions = {
     [key in keyof ts.CompilerOptions]: ts.CompilerOptions[key] extends string | boolean | undefined | null
         ? ts.CompilerOptions[key]
