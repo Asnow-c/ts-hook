@@ -30,6 +30,10 @@
         "hook.mjs",
         "require.cjs"
     ],
+    "exports": {
+        ".": "./hook.mjs",
+        "./hook.mjs": "./hook.mjs"
+    },
     "publishConfig": {
         "access": "public",
         "registry": "https://registry.npmjs.org/"

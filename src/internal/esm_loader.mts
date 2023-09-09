@@ -143,6 +143,9 @@ async function getTsModule(filename: string): Promise<NodeLoader.Format | undefi
 }
 
 type ForwardResult = NodeLoader.ResolveFxReturn | undefined;
+/**
+ * 通过异常捕获的方式, 可以解析到package.json 中imports 和 exports 字段定义的别名
+ */
 export class EsmErrorHandler {
     async forwardError(error: ModResolveError, specifier: string, parentUrl: string): Promise<ForwardResult> {
         switch (error.code) {

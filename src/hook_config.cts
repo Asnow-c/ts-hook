@@ -2,7 +2,8 @@ import type ts from "typescript";
 // import * as Fsp from "node:fs/promises";
 import * as Fsp from "node:fs";
 import * as Path from "node:path";
-import { ScriptTarget, jsonToTsConfig, parseJson } from "./util/tslib.js";
+import { jsonToTsConfig, parseJson } from "./util/tslib.js";
+import { getESVersion } from "./lib/es.js";
 interface ProcessEnv {
     SAME_PARSER?: string;
     TS_COMPILER_OPTIONS?: string;
@@ -42,13 +43,7 @@ function getDefaultCompilerOptions() {
 }
 const DEFAULT_COMPILER_OPTIONS = getDefaultCompilerOptions();
 const TOP_OPTIONS = (function () {
-    const NodeVersionMap: Record<string, ts.ScriptTarget> = {
-        19: ScriptTarget.ES2022,
-    };
-    const version = process.version.slice(1, process.version.indexOf("."));
-    const TARGET = DEFAULT_COMPILER_OPTIONS.target
-        ? DEFAULT_COMPILER_OPTIONS.target
-        : NodeVersionMap[version] ?? ScriptTarget.ESNext;
+    const TARGET = DEFAULT_COMPILER_OPTIONS.target ?? getESVersion() - 13;
 
     const TOP_OPTIONS: ts.CompilerOptions = {
         removeComments: true,
