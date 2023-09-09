@@ -1,5 +1,5 @@
-export * from "./out/node-loader/ts.resolver.mjs";
-export * from "./out/node-loader/ts_transpile.load.mjs" //编译ts
+export * from "./out/ts.resolver.mjs";
+export * from "./out/ts_transpile.load.mjs" //编译ts
 
 //node v20 兼容
 export function globalPreload(context) {

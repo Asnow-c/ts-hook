@@ -2,8 +2,7 @@ import { fork, ChildProcess, ForkOptions } from "child_process";
 import { expect } from "vitest";
 import * as Path from "node:path";
 import { fileURLToPath, pathToFileURL } from "url";
-import { HookConfig } from "../../hook_config.cjs";
-
+import { HookConfig } from "../../src/hook_config.cjs";
 export function resolveJsPath(meta: ImportMeta) {
     let file = fileURLToPath(meta.url);
     let dir = Path.resolve(file, "..");

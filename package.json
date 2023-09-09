@@ -1,27 +1,7 @@
 {
     "name": "@asnc/ts_hook",
     "version": "0.1.5",
-    "publishConfig": {
-        "access": "public",
-        "registry": "https://registry.npmjs.org/"
-    },
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/asnow-c/ts-hook"
-    },
-    "keywords": [
-        "TypeScript",
-        "node",
-        "node loader"
-    ],
-    "description": "",
-    "files": [
-        "out/**/*.mjs",
-        "out/**/*.js",
-        "out/**/*.cjs",
-        "hook.mjs",
-        "require.cjs"
-    ],
+    "description": "Run ts file in node",
     "scripts": {
         "build": "tsc -p ./tsconfig.build.json",
         "publishTest": "pnpm publish --no-git-checks --dry-run",
@@ -29,8 +9,6 @@
         "ci:test": "vitest run",
         "test:ui": "vitest --ui"
     },
-    "author": "asnow",
-    "license": "MIT",
     "devDependencies": {
         "@swc/core": "^1.3.52",
         "@types/node": "^20.1.1",
@@ -44,5 +22,25 @@
     },
     "engines": {
         "node": ">=16"
-    }
+    },
+    "author": "Eavid",
+    "license": "MIT",
+    "files": [
+        "out/**/*.?([mc])js",
+        "hook.mjs",
+        "require.cjs"
+    ],
+    "publishConfig": {
+        "access": "public",
+        "registry": "https://registry.npmjs.org/"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/asnow-c/ts-hook"
+    },
+    "keywords": [
+        "TypeScript",
+        "node",
+        "node loader"
+    ]
 }
