@@ -1,6 +1,9 @@
 import { compileTsCode } from "./compiler/compile.mjs";
 import { ModuleKind, isTsPath } from "./util/tslib.js";
-import { DEFAULT_OPTIONS } from "./hook_config.cjs";
+import { createCompilerOption } from "./hook_config.cjs";
+import { Pkg } from "./internal/common_loader.js";
+import { fileURLToPath } from "url";
+import type * as ts from "typescript";
 
 export async function load(
     url: string,
@@ -19,7 +22,14 @@ export async function load(
             let code: string | undefined;
             if (source) {
                 source = source.toString();
-                code = await compileTsCode(source, url, { ...DEFAULT_OPTIONS, module: ModuleKind.ESNext });
+                let pkgConfig: ts.CompilerOptions;
+                {
+                    const pkg = Pkg.upSearchPkg(fileURLToPath(url));
+                    if (pkg) pkgConfig = (await pkg.getTsConfig())?.baseCompileOptions ?? {};
+                    else pkgConfig = {};
+                }
+                const config = createCompilerOption(ModuleKind.NodeNext, pkgConfig);
+                code = await compileTsCode(source, url, createCompilerOption(ModuleKind.ESNext, config));
             }
             return {
                 format,

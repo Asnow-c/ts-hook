@@ -1,9 +1,10 @@
 import Module from "node:module";
 import { upSearch } from "../util/file_tool";
-import * as fsp from "node:fs/promises";
-import * as fs from "node:fs";
 import type * as ts from "typescript";
 import * as Path from "node:path";
+import { pickObjectAttr } from "../lib/object";
+import type { PackageConfig } from "./pkg";
+import { readTsConfigFile, readTsConfigFileSync } from "../util/tslib";
 
 export class Pkg implements PackageConfig {
     private static pkgSearchCache = new Map<string, string | null>();
@@ -70,14 +71,7 @@ export class TsCompilerConfig {
     static getTsCompilerConfigSync(pkgPath: string, pkgConfig: PackageConfig) {
         let instance = this.findCache(pkgPath);
         if (instance !== undefined) return instance;
-        let compilerOptions;
-        try {
-            const tsconfig = fs.readFileSync(pkgPath + "/tsconfig.json", "utf-8");
-            compilerOptions = JSON.parse(tsconfig)?.compilerOptions;
-        } catch (error) {
-            this.configCache.set(pkgPath, null);
-            return null;
-        }
+        let compilerOptions = readTsConfigFileSync(pkgPath + "/tsconfig.json", true);
         instance = new this(pkgPath, pkgConfig, compilerOptions);
         this.configCache.set(pkgPath, instance);
         return instance;
@@ -85,20 +79,14 @@ export class TsCompilerConfig {
     static async getTsCompilerConfig(pkgPath: string, pkgConfig: PackageConfig) {
         let instance = this.findCache(pkgPath);
         if (instance !== undefined) return instance;
-        let compilerOptions;
-        try {
-            const tsconfig = await fsp.readFile(pkgPath + "/tsconfig.json", "utf-8");
-            compilerOptions = JSON.parse(tsconfig)?.compilerOptions;
-        } catch (error) {
-            this.configCache.set(pkgPath, null);
-            return null;
-        }
+        let compilerOptions = await readTsConfigFile(pkgPath + "/tsconfig.json", true);
         instance = new this(pkgPath, pkgConfig, compilerOptions);
         this.configCache.set(pkgPath, instance);
         return instance;
     }
     private alias = new Map<RegExp, string[]>();
     constructor(private readonly pkgPath: string, pkgConfig: PackageConfig, options: ts.CompilerOptions) {
+        this.baseCompileOptions = options;
         const baseUrl = options.baseUrl ? Path.resolve(pkgPath, options.baseUrl) : pkgPath;
         const tsPaths = options.paths;
         if (!tsPaths) return;
@@ -113,6 +101,7 @@ export class TsCompilerConfig {
             alias.set(new RegExp(split), values);
         }
     }
+    readonly baseCompileOptions: ts.CompilerOptions;
     private aliasCache = new Map<string, string>();
 
     findAliasCache(request: string) {
@@ -163,20 +152,6 @@ export interface ExtraModule extends ModuleClass {
     ): string | undefined;
     _pathCache: Record<string, string>;
     _cache: Record<string, ExtraModule>;
-}
-type PkgExportsItemValue = string | null | string[];
-type PkgExports = Record<
-    "imports" | "require" | "node" | "default" | "types" | "." | string,
-    Record<string, PkgExportsItemValue> | PkgExportsItemValue
->;
-interface PackageConfig {
-    name?: string;
-    main?: string;
-    type?: "module" | "commonjs";
-    exports?: Record<string, any>;
-    imports?: Record<string, any>;
-    /** node 20 新增 */
-    exists?: boolean;
 }
 
 export const ExtraModule = Module as ExtraModule;

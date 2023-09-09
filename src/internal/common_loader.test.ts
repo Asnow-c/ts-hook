@@ -1,5 +1,5 @@
 import { TsCompilerConfig } from "./common_loader";
-import { it, expect, describe } from "vitest";
+import { it, expect, describe, vi } from "vitest";
 import type * as ts from "typescript";
 import * as Path from "node:path";
 const dir = __dirname;
@@ -10,7 +10,6 @@ function parseAlias(instance: TsCompilerConfig, alias: string) {
     for (const res of instance.paseAlias(alias)) {
         return res;
     }
-    
 }
 describe("别名解析", function () {
     it("无base", function () {
@@ -33,3 +32,15 @@ describe("别名解析", function () {
         });
     });
 });
+
+import fs from "node:fs";
+import fsp from "node:fs/promises";
+
+vi.mock("node:fs", function () {
+    return {} as any as typeof import("node:fs/promises");
+});
+vi.mock("node:fs/promises", function () {
+    return {} as any as typeof import("node:fs/promises");
+});
+//todo: pkg查找测试
+describe.skip("pkgFind", function () {});

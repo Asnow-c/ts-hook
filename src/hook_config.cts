@@ -1,8 +1,6 @@
 import type ts from "typescript";
-// import * as Fsp from "node:fs/promises";
-import * as Fsp from "node:fs";
 import * as Path from "node:path";
-import { jsonToTsConfig, parseJson } from "./util/tslib.js";
+import { ModuleKind, jsonToTsConfig, parseJson, readTsConfigFileSync } from "./util/tslib.js";
 import { getESVersion } from "./lib/es.js";
 interface ProcessEnv {
     SAME_PARSER?: string;
@@ -25,49 +23,45 @@ export type HookConfig = typeof hookConfig;
 
 function getDefaultCompilerOptions() {
     const cwd = process.cwd();
-    const jsonConfig: Record<string, any> = {};
+    const compilerOptions: ts.CompilerOptions = {};
 
     //解析环境变量中指定的tsconfig文件的编译选项
     const envPath = process.env["TS_CONFIG_PATH"];
     if (envPath) {
-        const configPath = Path.resolve(cwd, envPath);
-        let json = parseJson(Fsp.readFileSync(configPath, "utf-8")).compilerOptions;
-        Object.assign(jsonConfig, json);
+        const options = readTsConfigFileSync(Path.resolve(cwd, envPath));
+        Object.assign(compilerOptions, options);
     }
 
     //解析环境变量中的编译选项
     let fileContent = process.env["TS_COMPILER_OPTIONS"];
-    if (fileContent) Object.assign(jsonConfig, parseJson(fileContent));
-
-    return jsonToTsConfig(jsonConfig);
+    if (fileContent) Object.assign(compilerOptions, jsonToTsConfig(parseJson(fileContent)));
+    if (!compilerOptions.target) compilerOptions.target = getESVersion() - 13;
+    return compilerOptions;
 }
 const DEFAULT_COMPILER_OPTIONS = getDefaultCompilerOptions();
-const TOP_OPTIONS = (function () {
-    const TARGET = DEFAULT_COMPILER_OPTIONS.target ?? getESVersion() - 13;
+const TOP_OPTIONS: ts.CompilerOptions = {
+    removeComments: true,
+    sourceMap: false,
+    inlineSourceMap: true,
+    noEmit: false,
+    allowSyntheticDefaultImports: true,
+    declaration: false,
 
-    const TOP_OPTIONS: ts.CompilerOptions = {
-        removeComments: true,
-        sourceMap: false,
-        inlineSourceMap: true,
-        noEmit: false,
-        allowSyntheticDefaultImports: true,
-        declaration: false,
+    paths: undefined, //覆盖, swc会根据paths转换导入
 
-        //涉及到运行结果
-        experimentalDecorators: true,
-        emitDecoratorMetadata: true,
+    //module: [TsModuleKind.CommonJS, TsModuleKind.NodeNext, TsModuleKind.ESNext], 通过node进行确定
 
-        target: TARGET,
-        //module: [TsModuleKind.CommonJS, TsModuleKind.NodeNext, TsModuleKind.ESNext], 通过node进行确定
+    // importHelpers:true,
+    // noEmitHelpers
+    // useDefineForClassFields
+    // strict: false,
+    // alwaysStrict: false,
+    // noImplicitUseStrict: false,
+    // esModuleInterop: false,
+};
 
-        // importHelpers:true,
-        // noEmitHelpers
-        // useDefineForClassFields
-        // strict: false,
-        // alwaysStrict: false,
-        // noImplicitUseStrict: false,
-        // esModuleInterop: false,
-    };
-    return TOP_OPTIONS;
-})();
-export const DEFAULT_OPTIONS: ts.CompilerOptions = { ...TOP_OPTIONS, ...DEFAULT_COMPILER_OPTIONS };
+export function createCompilerOption(module: ModuleKind, modCompilerOption: ts.CompilerOptions): ts.CompilerOptions {
+    const option = { ...DEFAULT_COMPILER_OPTIONS, ...modCompilerOption, ...TOP_OPTIONS };
+    option.module = module;
+    return option;
+}
