@@ -3,8 +3,9 @@ export function* upSearch(checkPath: string, first = true, nodePath = Path) {
     let { root, dir, base } = nodePath.parse(nodePath.resolve(checkPath));
     const sep = nodePath.sep;
     if (base === "") {
-        if (sep === "\\" && dir.endsWith(sep)) checkPath = dir.slice(0, -1);
-        else checkPath = dir;
+        if (Path.sep === "\\" && dir.endsWith(Path.sep)) {
+            checkPath = dir.slice(0, -1); //windows 特殊
+        } else checkPath = dir;
     } else checkPath = dir === root ? root + base : dir + sep + base;
 
     if (first) yield checkPath;

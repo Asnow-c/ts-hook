@@ -38,12 +38,12 @@ describe.each(eachArg)("upSearch", function ({ cases, name }) {
 });
 describe("upSearch-window特殊", function () {
     it("/", function () {
-        const res = upSearchAll("/");
+        const res = upSearchAll("/", undefined, win32);
         expect(res).toHaveLength(1);
         expect(res[0]).toMatch(/^((\w:)|\\)$/); //window: "C:"   posix: "\"
     });
     it("/b", function () {
-        const res = upSearchAll("/b");
+        const res = upSearchAll("/b", undefined, win32);
         expect(res).toHaveLength(2);
         expect(res[0], "0").toMatch(/^((\w:)?\\b)$/); //window: "C:\b"   posix: "\b"
         expect(res[1], "1").toMatch(/^((\w:)|\\)$/); //window: "C:"   posix: "\"
