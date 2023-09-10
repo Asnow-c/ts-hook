@@ -17,10 +17,10 @@
             "request": "launch",
             "name": "hookTest-env",
             "runtimeArgs": ["--loader", "./hook.mjs"],
-            "skipFiles": [],
             "env": {
                 "SAME_PARSER": "${input:SAME_PARSER}"
             },
+            "autoAttachChildProcesses": true,
             "sourceMaps": true,
             "program": "${relativeFile}"
         }

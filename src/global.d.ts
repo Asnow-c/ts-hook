@@ -11,6 +11,7 @@ declare namespace NodeLoader {
         format?: Format;
         importAssertions?: any;
         shortCircuit?: boolean;
+        /** 必须是字符串url */
         url: string;
     }
 

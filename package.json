@@ -1,27 +1,7 @@
 {
     "name": "@asnc/ts_hook",
-    "version": "0.1.5",
-    "publishConfig": {
-        "access": "public",
-        "registry": "https://registry.npmjs.org/"
-    },
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/asnow-c/ts-hook"
-    },
-    "keywords": [
-        "TypeScript",
-        "node",
-        "node loader"
-    ],
-    "description": "",
-    "files": [
-        "out/**/*.mjs",
-        "out/**/*.js",
-        "out/**/*.cjs",
-        "hook.mjs",
-        "require.cjs"
-    ],
+    "version": "0.2.0",
+    "description": "Run ts file in node",
     "scripts": {
         "build": "tsc -p ./tsconfig.build.json",
         "publishTest": "pnpm publish --no-git-checks --dry-run",
@@ -29,14 +9,12 @@
         "ci:test": "vitest run",
         "test:ui": "vitest --ui"
     },
-    "author": "asnow",
-    "license": "MIT",
     "devDependencies": {
         "@swc/core": "^1.3.52",
         "@types/node": "^20.1.1",
         "@vitest/ui": "^0.33.0",
         "glob": "^10.2.2",
-        "typescript": "^4.9.4",
+        "typescript": "^5.2.2",
         "vitest": "^0.31.0"
     },
     "dependencies": {
@@ -44,5 +22,29 @@
     },
     "engines": {
         "node": ">=16"
-    }
+    },
+    "author": "Eavid",
+    "license": "MIT",
+    "files": [
+        "out/**/*.?([mc])js",
+        "hook.mjs",
+        "require.cjs"
+    ],
+    "exports": {
+        ".": "./hook.mjs",
+        "./hook.mjs": "./hook.mjs"
+    },
+    "publishConfig": {
+        "access": "public",
+        "registry": "https://registry.npmjs.org/"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/ieavid/ts-hook"
+    },
+    "keywords": [
+        "TypeScript",
+        "node",
+        "node loader"
+    ]
 }
