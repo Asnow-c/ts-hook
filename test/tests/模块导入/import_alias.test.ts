@@ -37,6 +37,10 @@ describe.concurrent("使用tsconfig的paths别名导入", function () {
     });
     it("mts-无扩展名别名", async function () {
         let process = await Process.run(dir, "entry_no_ext.mts");
+        expect(process.exit?.code).toBe(1);
+    });
+    it("mts-无扩展名别名-开启commonjs解析", async function () {
+        let process = await Process.run(dir, "entry_no_ext.mts", { sameParsing: true });
         expectPs(process).isSafeExit();
         expectPs(process).messageToEqual(["alias"]);
     });

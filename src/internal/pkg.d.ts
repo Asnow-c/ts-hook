@@ -13,6 +13,8 @@ export interface PackageConfig {
     type?: "module" | "commonjs";
     exports?: PkgExports;
     imports?: Record<string, string>;
-    /** node 20 新增 */
+    /** node 20 新增, node 20必定存在属性 */
     exists?: boolean;
+    /** node 20 新增, node 20必定存在属性 */
+    pjsonPath?: string;
 }

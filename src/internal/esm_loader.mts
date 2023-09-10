@@ -4,29 +4,36 @@ import type { Stats } from "node:fs";
 import * as fsp from "node:fs/promises";
 import { ExtraModule, type ModResolveError, Pkg, requestToNameAndSubPath } from "./common_loader.js";
 import { toAbsPath } from "../util/file_tool.js";
+import { hookConfig } from "../hook_config.cjs";
 
-//cjs和mjs扩展名规则
+/**
+ * @remark 如果扩展名以 .ts .js .mjs .cjs ,则尝试替换成对应的ts
+ */
 async function tryWithoutExt(absRequest: string): Promise<NodeLoader.ResolveFxReturn | undefined> {
     let { ext } = Path.parse(absRequest);
     let absPathWithoutExt = ext === "" ? absRequest : absRequest.slice(0, -ext.length);
 
-    let fileUrl: string | undefined;
+    let absPath: string | undefined;
     let format: NodeLoader.Format;
     if (ext === ".mjs") {
-        fileUrl = await tryResolveFile(absPathWithoutExt, [".mts"]);
+        absPath = await tryResolveFile(absPathWithoutExt, [".mts"]);
         format = "module";
     } else if (ext === ".cjs") {
-        fileUrl = await tryResolveFile(absPathWithoutExt, [".cts"]);
+        absPath = await tryResolveFile(absPathWithoutExt, [".cts"]);
         format = "commonjs";
     } else if (ext === ".js") {
-        fileUrl = await tryResolveFile(absPathWithoutExt, [".ts"]);
-        if (fileUrl) {
-            format = Pkg.upSearchPkg(fileURLToPath(fileUrl))?.defaultFormat ?? "commonjs";
+        absPath = await tryResolveFile(absPathWithoutExt, [".ts"]);
+        if (absPath) {
+            format = Pkg.upSearchPkg(absPath)?.defaultFormat ?? "commonjs";
         }
     }
-    if (fileUrl) return { url: fileUrl, format: format!, shortCircuit: true };
+    if (absPath) return { url: pathToFileURL(absPath).toString(), format: format!, shortCircuit: true };
 }
 
+/**
+ * @remark 尝试添加扩展名搜索
+ * @returns absPath
+ */
 async function tryResolveFile(absPathWithoutExt: string, extList: string[]): Promise<string | undefined> {
     for (const ext of extList) {
         let absPath = absPathWithoutExt + ext;
@@ -36,37 +43,74 @@ async function tryResolveFile(absPathWithoutExt: string, extList: string[]): Pro
         } catch (error) {
             continue;
         }
-        if (info.isFile()) return pathToFileURL(absPath).toString();
+        if (info.isFile()) return absPath;
     }
 }
-async function tryDirMod(path: string) {
-    let modPath = await tryResolveFile(Path.resolve(path, "index"), [".js", ".ts", ".json"]);
-    if (modPath) return modPath;
-}
-async function tryPkg(path: string): Promise<string | undefined> {
-    const main = ExtraModule._readPackage(path)?.main;
-    if (main) return tryResolveFile(Path.resolve(path, main), [".ts"]);
-    else return tryDirMod(path);
-}
 
-async function tryTs(resolvedPath: string) {
-    let result = await tryWithoutExt(resolvedPath);
-    if (result) return result;
-
-    let filename: string | undefined;
-    try {
-        let info = await fsp.stat(resolvedPath);
-        if (info.isDirectory()) {
-            filename = await tryDirMod(resolvedPath);
+async function tryResolveDir(
+    path: string,
+    nextResolve: NextResolve,
+    parentDir: string,
+    isCommonJs?: boolean
+): Promise<NodeLoader.ResolveFxReturn | undefined> {
+    const pkgConfig = ExtraModule._readPackage(path);
+    if (pkgConfig) {
+        return tryResolvePkg(nextResolve, path, parentDir);
+    } else if (isCommonJs) {
+        const absPath = await tryResolveFile(Path.resolve(path, "index"), [".ts", ".js", ".json"]);
+        if (absPath) {
+            let format: NodeLoader.Format =
+                ExtraModule._readPackage(absPath)?.type === "module" ? "module" : "commonjs";
+            return { url: pathToFileURL(absPath).toString(), format, shortCircuit: true };
         }
-    } catch (error) {
-        filename = await tryResolveFile(resolvedPath, [".ts"]);
-        if (!filename) return;
     }
+}
+
+export async function tryResolvePkg(nextResolve: NextResolve, specifier: string, parentDir: string) {
+    try {
+        const resolverResult = await nextResolve(specifier);
+        return resolverResult;
+    } catch (e) {
+        const error = e as ModResolveError;
+        const result = await errorHandler.forwardError(error, specifier, parentDir, nextResolve);
+        if (result) return result;
+        throw error;
+    }
+}
+
+/** 路径模块 */
+export async function tryResolvePathMod(
+    specifier: string,
+    parentDir: string,
+    nextResolve: NextResolve,
+    isCommonJs?: boolean
+): Promise<NodeLoader.ResolveFxReturn | undefined> {
+    let absPath: string;
+    if (specifier.startsWith(".")) absPath = Path.resolve(parentDir, specifier);
+    else if (Path.isAbsolute(specifier)) absPath = specifier;
+    else return;
+
+    let resolvedAbsPath: string | undefined;
+    const info = await fsp.stat(absPath).catch(() => undefined);
+
+    if (info?.isFile()) resolvedAbsPath = absPath;
+    else {
+        let result = await tryWithoutExt(absPath);
+        if (result) return result;
+
+        resolvedAbsPath = await tryResolveFile(absPath, isCommonJs ? [".ts", ".js", ".json"] : []);
+
+        if (!resolvedAbsPath && info?.isDirectory()) {
+            result = await tryResolveDir(absPath, nextResolve, parentDir!, isCommonJs);
+            if (result) return result;
+        }
+    }
+    if (!resolvedAbsPath) return;
+
     let format: NodeLoader.Format =
-        ExtraModule._readPackage(fileURLToPath(filename!))?.type === "module" ? "module" : "commonjs";
+        ExtraModule._readPackage(resolvedAbsPath!)?.type === "module" ? "module" : "commonjs";
     return {
-        url: filename!,
+        url: pathToFileURL(resolvedAbsPath).toString(),
         format,
         shortCircuit: true,
     };
@@ -74,9 +118,9 @@ async function tryTs(resolvedPath: string) {
 
 export async function tryTsAlias(
     request: string,
+    nextResolve: NextResolve,
     parentDir: string,
-    extList?: string[],
-    tryDir?: boolean
+    isCommonJs?: boolean
 ): Promise<NodeLoader.ResolveFxReturn | undefined> {
     const pkg = Pkg.upSearchPkg(parentDir);
     if (!pkg) return;
@@ -85,36 +129,14 @@ export async function tryTsAlias(
 
     let fileUrl = tsConfig.findAliasCache(request + "\u0000es");
     if (!fileUrl) {
-        for (let filePath of tsConfig.paseAlias(request)) {
-            try {
-                const info = await fsp.stat(filePath);
-                if (info.isFile()) {
-                    fileUrl = pathToFileURL(filePath).toString();
-                    break;
-                } else if (info.isDirectory()) {
-                    if (tryDir) {
-                        fileUrl = await tryDirMod(filePath);
-                        if (fileUrl) break;
-                    }
-                } else if (extList && extList.length) {
-                    let res = await tryWithoutExt(filePath);
-                    if (res) return res;
-                    fileUrl = await tryResolveFile(filePath, extList);
-                    if (fileUrl) break;
-                }
-            } catch (error) {
-                if (extList && extList.length) {
-                    let res = await tryWithoutExt(filePath);
-                    if (res) return res;
-                    fileUrl = await tryResolveFile(filePath, extList);
-                    if (fileUrl) break;
-                }
+        for (let specifier of tsConfig.paseAlias(request)) {
+            const result = await tryResolvePathMod(specifier, parentDir, nextResolve, isCommonJs);
+            if (result) {
+                tsConfig.setAliasCache(request + "\u0000es", result.url);
+                return result;
             }
         }
-        if (fileUrl) tsConfig.setAliasCache(request + "\u0000es", fileUrl);
     }
-
-    if (fileUrl) return { url: fileUrl, shortCircuit: true, format: pkg.getFileFormat(fileUrl) };
 }
 
 export async function resolveEntryFile(urlString: string): Promise<NodeLoader.ResolveFxReturn | undefined> {
@@ -146,8 +168,13 @@ type ForwardResult = NodeLoader.ResolveFxReturn | undefined;
 /**
  * 通过异常捕获的方式, 可以解析到package.json 中imports 和 exports 字段定义的别名
  */
-export class EsmErrorHandler {
-    async forwardError(error: ModResolveError, specifier: string, parentUrl: string): Promise<ForwardResult> {
+class EsmErrorHandler {
+    async forwardError(
+        error: ModResolveError,
+        specifier: string,
+        parentDir: string,
+        nextResolve: NextResolve
+    ): Promise<ForwardResult> {
         switch (error.code) {
             case "ERR_MODULE_NOT_FOUND":
                 let pkgPath = /^Cannot find package '([^']*)' imported from /.exec(error.message)?.[1];
@@ -158,16 +185,21 @@ export class EsmErrorHandler {
                 } else {
                     let resolvedPath = /^Cannot find module '([^']*)' imported from /.exec(error.message)?.[1];
                     if (!resolvedPath) throw error;
-                    let result = await this.handlerModuleNotFind(resolvedPath, specifier, parentUrl);
+                    let result = await this.handlerModuleNotFind(resolvedPath, specifier, parentDir, nextResolve);
                     if (result) return result;
                 }
 
                 break;
             default:
-                return this.handlerOtherErr(error, specifier, parentUrl);
+                return this.handlerOtherErr(error, specifier, parentDir, nextResolve);
         }
     }
-    async handlerOtherErr(error: ModResolveError, specifier: string, parentUrl: string): Promise<ForwardResult> {
+    async handlerOtherErr(
+        error: ModResolveError,
+        specifier: string,
+        parentDir: string,
+        nextResolve: NextResolve
+    ): Promise<ForwardResult> {
         return;
     }
     async handlerPkgNotFound(pkgPath: string, specifier: string): Promise<ForwardResult> {
@@ -185,12 +217,12 @@ export class EsmErrorHandler {
         if (!main) return;
         return tryWithoutExt(Path.resolve(pkgPath, main));
     }
-    async handlerModuleNotFind(resolvedPath: string, specifier: string, parentUrl: string) {
+    async handlerModuleNotFind(resolvedPath: string, specifier: string, parentDir: string, nextResolve: NextResolve) {
         return tryWithoutExt(resolvedPath);
     }
 }
-export class CommonAdapter extends EsmErrorHandler {
-    async handlerModuleNotFind(resolvedPath: string, specifier: string, parentUrl: string) {
+class CommonAdapter extends EsmErrorHandler {
+    async handlerModuleNotFind(resolvedPath: string, specifier: string, parentDir: string, nextResolve: NextResolve) {
         let isSubMod;
         if (Path.sep === "\\") isSubMod = resolvedPath.replaceAll("\\", "/").endsWith(specifier);
         else isSubMod = resolvedPath.endsWith(specifier);
@@ -202,13 +234,12 @@ export class CommonAdapter extends EsmErrorHandler {
             const pkg = Pkg.getPkg(pkgPath);
             if (!pkg) return;
             resolvedPath = Path.resolve(pkg.pkgPath, "..", specifier);
-            return tryTs(resolvedPath);
+            return tryResolvePathMod(resolvedPath, parentDir, nextResolve, true);
         } else {
             //相对路径导入文件或文件夹
-            const parentDir = Path.resolve(fileURLToPath(parentUrl), "..");
             let absRequestPath = toAbsPath(specifier, parentDir);
-            if (absRequestPath) return tryTs(absRequestPath);
-            else return super.handlerModuleNotFind(resolvedPath, specifier, parentUrl);
+            if (absRequestPath) return tryResolvePathMod(absRequestPath, parentDir, nextResolve, true);
+            else return super.handlerModuleNotFind(resolvedPath, specifier, parentDir, nextResolve);
         }
     }
     async pkgNotFound_mainHandler(pkgPath: string, specifier: string) {
@@ -217,18 +248,27 @@ export class CommonAdapter extends EsmErrorHandler {
         if (!main) return;
         return tryWithoutExt(Path.resolve(pkgPath, main));
     }
-    async handlerUnsupportedDirImport(message: string): Promise<ForwardResult> {
+    async handlerUnsupportedDirImport(
+        message: string,
+        parentDir: string,
+        nextResolve: NextResolve
+    ): Promise<ForwardResult> {
         //导入的包的子模块为目录
         const matchRegExp = /^Directory import '([^']*)' is not supported resolving ES modules imported from /;
         const resolvedPath = matchRegExp.exec(message)?.[1];
 
         if (!resolvedPath) return;
-        return tryTs(resolvedPath);
+        return tryResolvePathMod(resolvedPath, parentDir, nextResolve, true);
     }
-    async handlerOtherErr(error: ModResolveError, specifier: string, parentUrl: string) {
+    async handlerOtherErr(error: ModResolveError, specifier: string, parentDir: string, nextResolve: NextResolve) {
         if (error.code === "ERR_UNSUPPORTED_DIR_IMPORT") {
-            return this.handlerUnsupportedDirImport(error.message);
+            return this.handlerUnsupportedDirImport(error.message, parentDir, nextResolve);
         }
         return;
     }
+}
+
+const errorHandler = hookConfig.sameParsing ? new CommonAdapter() : new EsmErrorHandler();
+export interface NextResolve {
+    (specifier: string): Promise<NodeLoader.ResolveFxReturn>;
 }

@@ -1,12 +1,9 @@
 import Module from "node:module";
 import { fileURLToPath } from "url";
 import { isTsPath as isTsUrl } from "./util/tslib.js";
-import { resolveEntryFile, tryTsAlias, EsmErrorHandler, CommonAdapter } from "./internal/esm_loader.mjs";
-import { ModResolveError } from "./internal/common_loader.js";
+import { resolveEntryFile, tryTsAlias, tryResolvePathMod, NextResolve, tryResolvePkg } from "./internal/esm_loader.mjs";
 import { hookConfig } from "./hook_config.cjs";
 import * as Path from "node:path";
-
-const errorHandler = hookConfig.sameParsing ? new CommonAdapter() : new EsmErrorHandler();
 
 class ResolveEsCache {
     private static esCache = new Map<string, { url: string; format?: NodeLoader.Format } | null>();
@@ -40,25 +37,18 @@ export async function resolve(
 
     const parentFilename = fileURLToPath(parentURL);
     const parentDir = Path.resolve(parentFilename, "..");
+    const paseNextResolve: NextResolve = (specifier) => nextResolve(specifier, context);
 
     //查找缓存
-    const result = ResolveEsCache.tryCache(parentDir, specifier);
+    let result = ResolveEsCache.tryCache(parentDir, specifier);
     if (result) return result;
-    else if (result === null) return nextResolve(specifier, context);
+    else if (result === null) return paseNextResolve(specifier);
 
-    let error: ModResolveError;
-    try {
-        const resolverResult = await nextResolve(specifier, context);
-        return resolverResult;
-    } catch (e) {
-        error = e as ModResolveError;
-        const result = await errorHandler.forwardError(error, specifier, parentURL);
-        if (result) return ResolveEsCache.setCache(parentDir, specifier, result);
-    }
-    {
-        const result = await tryTsAlias(specifier, parentDir, [".js", ".ts", ".json"], true);
-        if (result) return ResolveEsCache.setCache(parentDir, specifier, result);
-    }
-    ResolveEsCache.setCache(parentDir, specifier, null);
-    throw error;
+    //路径导入
+    result = await tryResolvePathMod(specifier, parentDir, paseNextResolve, hookConfig.sameParsing);
+    //路径别名
+    if (!result) result = await tryTsAlias(specifier, paseNextResolve, parentDir, hookConfig.sameParsing);
+    //包名、包imports
+    if (!result) result = await tryResolvePkg(paseNextResolve, specifier, parentDir);
+    return ResolveEsCache.setCache(parentDir, specifier, result);
 }
