@@ -53,8 +53,8 @@ async function tryResolveDir(
     parentDir: string,
     isCommonJs?: boolean
 ): Promise<NodeLoader.ResolveFxReturn | undefined> {
-    const pkgConfig = ExtraModule._readPackage(path);
-    if (pkgConfig) {
+    const pkgConfig = ExtraModule._readPackage(path); //node 20 即使不存在也会返回
+    if (pkgConfig && pkgConfig.exists !== false) {
         return tryResolvePkg(nextResolve, path, parentDir);
     } else if (isCommonJs) {
         const absPath = await tryResolveFile(Path.resolve(path, "index"), [".ts", ".js", ".json"]);

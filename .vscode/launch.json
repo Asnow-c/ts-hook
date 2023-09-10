@@ -20,6 +20,7 @@
             "env": {
                 "SAME_PARSER": "${input:SAME_PARSER}"
             },
+            "autoAttachChildProcesses": true,
             "sourceMaps": true,
             "program": "${relativeFile}"
         }
