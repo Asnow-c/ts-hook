@@ -12,6 +12,10 @@ function parseAlias(instance: TsCompilerConfig, alias: string) {
     }
 }
 describe("别名解析", function () {
+    it("全匹配", function () {
+        let tsConfig = createInstance({ paths: { "@/abc": ["./src/abc"] } });
+        expect(parseAlias(tsConfig, "@/abc")).toBe(Path.resolve(dir, "./src/abc"));
+    });
     it("无base", function () {
         let tsConfig = createInstance({ paths: { "@/*": ["./src/*"] } });
         expect(parseAlias(tsConfig, "@/y")).toBe(Path.resolve(dir, "./src/y"));

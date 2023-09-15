@@ -2,7 +2,6 @@ import Module from "node:module";
 import { upSearch } from "../util/file_tool";
 import type * as ts from "typescript";
 import * as Path from "node:path";
-import { pickObjectAttr } from "../lib/object";
 import type { PackageConfig } from "./pkg";
 import { readTsConfigFile, readTsConfigFileSync } from "../util/tslib";
 
@@ -120,7 +119,7 @@ export class TsCompilerConfig {
                     if (!vab) continue;
                     yield Path.resolve(this.pkgPath, map.replace(/\*/g, vab));
                 } else {
-                    return maps;
+                    yield map;
                 }
             }
         }

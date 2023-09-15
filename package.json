@@ -1,6 +1,6 @@
 {
     "name": "@asnc/ts_hook",
-    "version": "0.2.0",
+    "version": "0.2.1",
     "description": "Run ts file in node",
     "scripts": {
         "build": "tsc -p ./tsconfig.build.json",

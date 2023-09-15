@@ -7,13 +7,12 @@
 全局安装: `npm install @asnc/ts_hook -g`\
 项目安装: `npm install @asnc/ts_hook -D`
 
-用法: `node --loader MODULE_PATH/@asnc/ts_hook  xx.ts`\
-用法: `node --loader MODULE_PATH/@asnc/ts_hook  xx.mts`\
-用法: `node --loader MODULE_PATH/@asnc/ts_hook  xx.cts`\
-用法: `node --loader @asnc/ts_hook  xx.cts` （项目级使用）\
+用法: `node --loader MODULE_PATH/@asnc/ts_hook/hook.mjs  xx.ts`\
+用法: `node --loader MODULE_PATH/@asnc/ts_hook/hook.mjs  xx.mts`\
+用法: `node --loader MODULE_PATH/@asnc/ts_hook/hook.mjs  xx.cts`\
+用法: `node --loader @asnc/ts_hook  xx.cts` （项目级使用, 不需要指定入口文件"hook.mjs"）
 
-> 注意: `MODULE_PATH`是你安装`@asnc/ts_hook`的所在目录的绝对或相对路径, 使用绝对路径时, Windows 系统下必须以`/`开头
-> 如 `/C:/npm_global/@asnc/ts_hook`, 使用相对路径时, 相对于 node 的启动目录, 且必须以`./`开头
+> 注意: `MODULE_PATH`是你安装`@asnc/ts_hook`的所在目录的绝对或相对路径. 全局使用时, 必须是指定绝对路径, 并且是指定到模块的入口文件。Windows 系统下必须以`/`开头，如 `/C:/npm_global/@asnc/ts_hook/hook.mjs`。
 
 > 如果使用全局安装`ts_hook`, 你需要全局安装 typescript 或 @swc/core 其中的一个依赖, 如果是项目安装`ts_hook`, 你需要在项目中安装 typescript 或 @swc/core, ts_hook 依赖他们, ts_hook 优先尝试导入 @swc/core, 如果导入失败, 才会尝试导入 typescript, 你可以在通过配置进行选择
 
@@ -126,7 +125,7 @@ vscode 调试配置, 可以注入环境变量
             "type": "node",
             "request": "launch",
             "name": "ts debugger",
-            "runtimeArgs": ["--loader", "./node_modules/@asnc/ts_hook"], //使用loader
+            "runtimeArgs": ["--loader", "./node_modules/@asnc/ts_hook/hook.mjs"], //使用loader
             //注入环境变量
             "env": {
                 "SAME_PARSER": "" //设置"" 即false
