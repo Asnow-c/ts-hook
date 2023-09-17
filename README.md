@@ -9,13 +9,12 @@ This hook is primarily used to run typescript directly in the development enviro
 Global install: `npm install @asnc/ts_hook -g`\
 Project install: `npm install @asnc/ts_hook -D`
 
-Usage: `node --loader MODULE_PATH/@asnc/ts_hook  xx.ts`\
-Usage: `node --loader MODULE_PATH/@asnc/ts_hook  xx.mts`\
-Usage: `node --loader MODULE_PATH/@asnc/ts_hook  xx.cts`\
-Usage: `node --loader @asnc/ts_hook  xx.cts` (Project level use)\
+Usage: `node --loader MODULE_PATH/@asnc/ts_hook/hook.mjs  xx.ts`\
+Usage: `node --loader MODULE_PATH/@asnc/ts_hook/hook.mjs  xx.mts`\
+Usage: `node --loader MODULE_PATH/@asnc/ts_hook/hook.mjs  xx.cts`\
+Usage: `node --loader @asnc/ts_hook  xx.cts` (For project-level use, there is no need to specify an entry file "hook.mjs")\
 
-> Note: `MODULE_PATH` is the absolute or relative path to the directory where you installed @asnc/ts_hook. When using an absolute path, Windows must start with a `/`
-> Example `/C:/npm_global/@asnc/ts_hook.mjs`, when using a relative path, relative to the node's startup directory, and must start with `./`
+> Note: `MODULE_PATH` is the absolute or relative path to the directory where you installed @asnc/ts_hook. When used globally, the absolute path must be specified and the entry file to the module must be specified. Windows must start with a `/`. Example `/C:/npm_global/@asnc/ts_hook.mjs`
 
 > If you use a global installation `@asnc/ts_hook`, you need to install one of the dependencies of typescript or `@swc/core` globally. If you use a project installation `@asnc/ts_hook`, you need to install typescript or `@swc/core` in your project. ts_hook relies on them. `@asnc/ts_hook` tries to import `@swc/core` first. If the import fails, it will try to import typescript
 
@@ -128,7 +127,7 @@ vscode debug configuration, you can inject environment variables
             "type": "node",
             "request": "launch",
             "name": "ts debugger",
-            "runtimeArgs": ["--loader", "./node_modules/@asnc/ts_hook"], //Use loader
+            "runtimeArgs": ["--loader", "./node_modules/@asnc/ts_hook/hook.mjs"], //Use loader
             //Injected environment variable
             "env": {
                 "SAME_PARSER": "" //Set "" which is true

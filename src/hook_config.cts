@@ -6,12 +6,14 @@ interface ProcessEnv {
     TS_COMPILER_OPTIONS?: string;
     TS_CONFIG_PATH?: string;
     COMPILER?: "swc" | "tsc";
+    DISABLE_SOURCE_MAP?: string;
 }
 const env = process.env as ProcessEnv;
 if (env.COMPILER !== "swc" && env.COMPILER !== "tsc") delete env.COMPILER;
 export const hookConfig = {
     sameParsing: !!env["SAME_PARSER"],
     compiler: env.COMPILER,
+    enableSourceMap: !env["DISABLE_SOURCE_MAP"],
 };
 
 export type HookConfig = typeof hookConfig;
@@ -41,7 +43,7 @@ const DEFAULT_COMPILER_OPTIONS = getDefaultCompilerOptions();
 const TOP_OPTIONS: ts.CompilerOptions = {
     removeComments: true,
     sourceMap: false,
-    inlineSourceMap: true,
+    inlineSourceMap: hookConfig.enableSourceMap,
     noEmit: false,
     allowSyntheticDefaultImports: true,
     declaration: false,
