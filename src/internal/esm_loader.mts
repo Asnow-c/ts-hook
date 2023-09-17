@@ -107,10 +107,10 @@ export async function tryResolvePathMod(
     }
     if (!resolvedAbsPath) return;
 
-    let format: NodeLoader.Format =
-        ExtraModule._readPackage(resolvedAbsPath!)?.type === "module" ? "module" : "commonjs";
+    const url = pathToFileURL(resolvedAbsPath).toString();
+    let format: NodeLoader.Format = (await getTsModuleKind(url)) ?? "commonjs";
     return {
-        url: pathToFileURL(resolvedAbsPath).toString(),
+        url,
         format,
         shortCircuit: true,
     };
