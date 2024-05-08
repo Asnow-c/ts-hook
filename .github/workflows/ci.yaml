@@ -30,8 +30,7 @@ jobs:
         id: check_tag
         uses: asnowc/actions@check-tags/v1
         with:
-          file: .
-          preset: pnpm-workspace
+          file: package.json
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   publish:
