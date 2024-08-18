@@ -1,9 +1,9 @@
 {
-    "extends": "./tsconfig.json",
-    "compilerOptions": {
-        "target": "ES2022",
-        "skipLibCheck": true
-    },
-    "exclude": ["**/test", "**/__test__", "**/*.test.?ts", "**/*.test.ts"],
-    "include": ["src/node-loader", "src/*"]
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "target": "ES2022",
+    "skipLibCheck": true
+  },
+  "exclude": ["**/test", "**/__test__", "**/*.test.?ts", "**/*.test.ts"],
+  "include": ["src/*"]
 }

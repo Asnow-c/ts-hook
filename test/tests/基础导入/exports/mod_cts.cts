@@ -1,4 +1,6 @@
-process.send?.("imported cts");
 console.log(__dirname as any);
-
-export {};
+export default 8;
+setTimeout(() => {
+    process.exit(8);
+  });
+  

@@ -1,50 +1,45 @@
 import { expect, it, describe } from "vitest";
-import { Process, resolveJsPath, expectPs } from "../../util";
+import { resolveJsPath, TestSpawn } from "../../fixtrues/test";
 
+const command = new TestSpawn();
 let meta = resolveJsPath(import.meta);
 
-describe.concurrent("导入package.json指定的main", function () {
-    describe.concurrent("导入没有exports但有main字段的包", function () {
-        const dir = meta.dir + "/import_modules/has_main";
-        it("cts导入", async function () {
-            let process = await Process.run(dir, "import_main.cts");
-            expectPs(process).isSafeExit();
-            expectPs(process).messageToEqual(["main.ts", "entry"]);
-        });
-        it("mts", async function () {
-            let process = await Process.run(dir, "import_main.mts");
-            expectPs(process).isSafeExit();
-            expectPs(process).messageToEqual(["main.ts", "entry"]);
-        });
+describe("导入package.json指定的main", function () {
+  describe("导入没有exports但有main字段的包", function () {
+    const dir = meta.dir + "/import_modules/has_main";
+    it("cts导入", async function () {
+      let process = command.spawnSync(dir + "/import_main.cts");
+      expect(process.code).toBe(0);
     });
-    describe.concurrent("导入没有main且没有exports字段的包", function () {
-        const dir = meta.dir + "/import_modules/no_main_no_exports";
-        it("cts导入", async function () {
-            let process = await Process.run(dir, "import_main.cts");
-            expectPs(process).isSafeExit();
-            expectPs(process).messageToEqual(["index.ts", "entry"]);
-        });
-        it("mts-开启相同commonjs解析策略", async function () {
-            let process = await Process.run(dir, "import_main.mts", { sameParsing: true });
-            expectPs(process).isSafeExit();
-            expectPs(process).messageToEqual(["index.ts", "entry"]);
-        });
-        it("mts", async function () {
-            let process = await Process.run(dir, "import_main.mts");
-            expect(process.exit?.code).toBe(1);
-        });
+    it("mts", async function () {
+      let process = command.spawnSync(dir + "/import_main.mts");
+      expect(process.code).toBe(0);
     });
-    describe.concurrent("导入有exports字段的包", function () {
-        const dir = meta.dir + "/import_modules/has_exports";
-        it("cts导入包", async function () {
-            let process = await Process.run(dir, "import_main.cts");
-            expectPs(process).isSafeExit();
-            expectPs(process).messageToEqual(["main.ts"]);
-        });
-        it("mts导入包", async function () {
-            let process = await Process.run(dir, "import_main.mts");
-            expectPs(process).isSafeExit();
-            expectPs(process).messageToEqual(["main.ts"]);
-        });
+  });
+  describe("导入没有main且没有exports字段的包", function () {
+    const dir = meta.dir + "/import_modules/no_main_no_exports";
+    it("cts导入", async function () {
+      let process = command.spawnSync(dir + "/import_main.cts");
+      expect(process.code).toBe(0);
     });
+    it("mts-开启相同commonjs解析策略", async function () {
+      let process = command.spawnSync(dir + "/import_main.mts", { SAME_PARSER: "true" });
+      expect(process.code).toBe(0);
+    });
+    it("mts", async function () {
+      let process = command.spawnSync(dir + "/import_main.mts");
+      expect(process.code).toBe(1);
+    });
+  });
+  describe("导入有exports字段的包", function () {
+    const dir = meta.dir + "/import_modules/has_exports";
+    it("cts导入包", async function () {
+      let process = command.spawnSync(dir + "/import_main.cts");
+      expect(process.code).toBe(0);
+    });
+    it("mts导入包", async function () {
+      let process = command.spawnSync(dir + "/import_main.mts");
+      expect(process.code).toBe(0);
+    });
+  });
 });

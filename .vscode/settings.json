@@ -1,7 +1,7 @@
 {
-    "typescript.tsdk": "node_modules\\typescript\\lib",
-    "npm.exclude": [
-        "**/test/**",
-        "**/__test__/**"
-    ]
+  "typescript.tsdk": "node_modules\\typescript\\lib",
+  "npm.exclude": ["**/test/**", "**/__test__/**"],
+  "terminal.integrated.env.windows": {
+    "COMPILER": "tsc"
+  }
 }

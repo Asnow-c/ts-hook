@@ -1,3 +1,6 @@
 console.log(__dirname as any);
+export default 8;
 
-process.send?.("imported dir");
+setTimeout(() => {
+  process.exit(8);
+});

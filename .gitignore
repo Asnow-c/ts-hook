@@ -1,3 +1,4 @@
 /node_modules
 /src/node-loader/test/project_test/**/node_modules
 /out
+test/__env

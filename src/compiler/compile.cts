@@ -1,3 +1,4 @@
+import { hookConfig } from "../hook_config.cjs";
 import { CompileImportError, NoCompileError } from "./errors.cjs";
 
 function tryCompiler(compiler?: "swc" | "tsc") {
@@ -18,4 +19,4 @@ function tryCompiler(compiler?: "swc" | "tsc") {
     }
     throw new NoCompileError();
 }
-export const transformSync = tryCompiler();
+export const transformSync = tryCompiler(hookConfig.compiler);

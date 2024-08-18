@@ -1,15 +1,15 @@
 {
-    "compilerOptions": {
-        "module": "NodeNext",
-        "target": "ESNext",
-        "moduleResolution": "nodenext",
-        "sourceMap": true,
-        "skipDefaultLibCheck": true,
-        "strict": true,
-        "outDir": "out",
-        "resolveJsonModule": false,
-        "allowSyntheticDefaultImports": true
-    },
-    "exclude": ["node_modules"],
-    "include": ["src", "test"]
+  "compilerOptions": {
+    "module": "NodeNext",
+    "target": "ES2022",
+    "lib": ["ES2022"],
+    "moduleResolution": "NodeNext",
+    "sourceMap": true,
+    "skipDefaultLibCheck": true,
+    "strict": true,
+    "outDir": "out",
+    "resolveJsonModule": false,
+    "allowSyntheticDefaultImports": true
+  },
+  "exclude": ["node_modules", "out"]
 }

@@ -1,40 +1,44 @@
 {
-    // 使用 IntelliSense 了解相关属性。
-    // 悬停以查看现有属性的描述。
-    // 欲了解更多信息，请访问: https://go.microsoft.com/fwlink/?linkid=830387
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "type": "node",
-            "request": "launch",
-            "name": "hookTest",
-            "runtimeArgs": ["--loader", "./hook.mjs"],
-            "sourceMaps": true,
-            "program": "${relativeFile}"
-        },
-        {
-            "type": "node",
-            "request": "launch",
-            "name": "hookTest-env",
-            "runtimeArgs": ["--loader", "./hook.mjs"],
-            "env": {
-                "SAME_PARSER": "${input:SAME_PARSER}"
-            },
-            "autoAttachChildProcesses": true,
-            "sourceMaps": true,
-            "program": "${relativeFile}"
-        }
-    ],
-    "inputs": [
-        {
-            "id": "SAME_PARSER", //id，在引用时使用
-            "type": "pickString",
-            "description": "是否开启相同解析",
-            "default": "",
-            "options": [
-                { "label": "true", "value": "true" },
-                { "label": "false", "value": "" }
-            ]
-        }
-    ]
+  // 使用 IntelliSense 了解相关属性。
+  // 悬停以查看现有属性的描述。
+  // 欲了解更多信息，请访问: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "hookTest",
+      "runtimeArgs": ["--loader", "./hook.mjs"],
+      "env": {
+        "COMPILER": "tsc"
+      },
+      "sourceMaps": true,
+      "program": "${relativeFile}",
+      "runtimeExecutable": "${workspaceFolder}/test/__env/node18.exe"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "hookTest-env",
+      "runtimeArgs": ["--loader", "./hook.mjs"],
+      "env": {
+        "SAME_PARSER": "${input:SAME_PARSER}"
+      },
+      "autoAttachChildProcesses": true,
+      "sourceMaps": true,
+      "program": "${relativeFile}"
+    }
+  ],
+  "inputs": [
+    {
+      "id": "SAME_PARSER", //id，在引用时使用
+      "type": "pickString",
+      "description": "是否开启相同解析",
+      "default": "",
+      "options": [
+        { "label": "true", "value": "true" },
+        { "label": "false", "value": "" }
+      ]
+    }
+  ]
 }
